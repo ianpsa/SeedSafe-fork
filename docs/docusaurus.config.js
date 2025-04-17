@@ -15,15 +15,13 @@ const config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://NDC-LoiraBigData.com',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/docs',
+   url: 'https://miguelclaret.github.io',
+  baseUrl: '/Nero-NDC-LoiraBigData/'
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'NDC-LoiraBigData', // Usually your repo name.
+  projectName: 'Nero-NDC-LoiraBigData', // Usually your repo name.
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
