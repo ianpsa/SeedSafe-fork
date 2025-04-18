@@ -39,9 +39,16 @@ SeedSafe is a decentralized Web3 platform built on the NERO Chain. Its objective
 
 This diagram represents the dynamic flow of information and calls between agents (producers, auditors, investors) and smart contracts.
 
-![UML Flow](../../static/img/umlDiagramFlow.png)
-
+<p style={{textAlign: 'center'}}>Figure 1: Sequence Diagram UML</p>
+<div style={{margin: 15}}>
+    <div style={{textAlign: 'center'}}>
+        <img src={require("../../static/img/umlDiagramFlow.png").default} style={{width: 800}} alt="UML Diagram Flow" />
+        <br />
+    </div>
+</div>
 <p style={{textAlign: 'center'}}>Source: Produced by the Authors (2025).</p>
+
+
 
 | Step | Initiator   | Contract         | Function                     | Description                                                                 |
 |------|-------------|------------------|------------------------------|-----------------------------------------------------------------------------|
@@ -61,7 +68,17 @@ This diagram represents the dynamic flow of information and calls between agents
 
 Illustrates all core layers involved in user interaction, contract execution, and gasless infrastructure.
 
-![Blocks Diagram](../../static/img/diagramaBlocos.png)
+
+<p style={{textAlign: 'center'}}>Figure 2: Block Diagram</p>
+<div style={{margin: 15}}>
+    <div style={{textAlign: 'center'}}>
+        <img src={require("../../static/img/diagramaBlocos.png").default} style={{width: 800}} alt="Blocks Diagram" />
+        <br />
+    </div>
+</div>
+<p style={{textAlign: 'center'}}>Source: Produced by the Authors (2025).</p>
+
+
 
 | Component               | Role Description                                                             |
 |------------------------|------------------------------------------------------------------------------|
@@ -81,7 +98,16 @@ Illustrates all core layers involved in user interaction, contract execution, an
 
 Illustrates static relationships and responsibilities of each smart contract module.
 
-![UML Class Diagram](../../static/img/umlDiagramContracts.png)
+
+<p style={{textAlign: 'center'}}>Figure 3: Class Diagram UML (Contracts)</p>
+<div style={{margin: 15}}>
+    <div style={{textAlign: 'center'}}>
+        <img src={require("../../static/img/umlDiagramContracts.png").default} style={{width: 800}} alt="UML Class Diagram" />
+        <br />
+    </div>
+</div>
+<p style={{textAlign: 'center'}}>Source: Produced by the Authors (2025).</p>
+
 
 | Contract        | Key Responsibilities                                                      |
 |-----------------|----------------------------------------------------------------------------|
