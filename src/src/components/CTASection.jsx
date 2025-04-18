@@ -1,4 +1,6 @@
 import React from 'react';
+// Importação direta dos assets
+import partner1 from '../assets/nerochain.svg';
 
 const CTASection = ({ openWalletModal }) => {
   return (
@@ -15,35 +17,24 @@ const CTASection = ({ openWalletModal }) => {
           >
             Começar Agora
           </button>
-          <button className="py-4 px-8 rounded-md text-lg font-semibold border-2 border-gray-300 hover:border-green-700 hover:text-green-700 hover:-translate-y-0.5 transition-all">
-            Agendar Demonstração
-          </button>
         </div>
       </div>
-      
       <div className="partners">
-        <h4 className="text-gray-600 mb-6 font-medium">Parceiros e Apoiadores</h4>
+        <h4 className="text-gray-600 mb-6 font-medium text-xl">Powered by</h4>
         <div className="flex justify-center flex-wrap gap-8 items-center">
-          <img 
-            src="/assets/partner-1.svg" 
-            alt="NERO Chain" 
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
-          <img 
-            src="/assets/partner-2.svg" 
-            alt="Cooperativa Agrícola" 
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
-          <img 
-            src="/assets/partner-3.svg" 
-            alt="Verificadora Ambiental" 
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
-          <img 
-            src="/assets/partner-4.svg" 
-            alt="Investidora ESG" 
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
+          {/* Envolvendo a imagem com uma tag de âncora para torná-la clicável */}
+          <a 
+            href="https://nerochain.io/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="transition-all hover:scale-105"
+          >
+            <img
+              src={partner1}
+              alt="NERO Chain"
+              className="opacity-70 hover:opacity-100 transition-opacity size-fit"
+            />
+          </a>
         </div>
       </div>
     </section>
