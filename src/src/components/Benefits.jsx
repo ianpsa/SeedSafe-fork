@@ -9,6 +9,7 @@ const BenefitCard = ({ icon, title, benefits, buttonText }) => {
         </div>
         <h3 className="text-xl font-bold">{title}</h3>
       </div>
+      
       <ul className="mb-6">
         {benefits.map((benefit, index) => (
           <li key={index} className="mb-3 flex items-center gap-2">
@@ -17,6 +18,7 @@ const BenefitCard = ({ icon, title, benefits, buttonText }) => {
           </li>
         ))}
       </ul>
+      
       <button className="w-full py-2 px-4 rounded-md font-semibold bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 hover:-translate-y-0.5 transition-all">
         {buttonText}
       </button>
@@ -28,51 +30,52 @@ const Benefits = () => {
   const benefitCards = [
     {
       icon: 'fas fa-tractor',
-      title: 'For Producers',
+      title: 'Para Produtores',
       benefits: [
-        'Advanced capital without abusive interest',
-        'Extra income with carbon credits',
-        'Zero transaction fees (gasless)',
-        'Building on-chain reputation',
-        'Access to premium sustainable market'
+        'Capital antecipado sem juros abusivos',
+        'Renda extra com créditos de carbono',
+        'Zero taxas de transação (gasless)',
+        'Construção de reputação on-chain',
+        'Acesso a mercado premium sustentável'
       ],
-      buttonText: 'I am a Producer'
+      buttonText: 'Sou Produtor'
     },
     {
       icon: 'fas fa-chart-pie',
-      title: 'For Investors',
+      title: 'Para Investidores',
       benefits: [
-        'Exposure to fractionalized commodities',
-        'ESG impact NFT Combo',
-        'Protection by Guarantee Fund',
-        'Complete on-chain traceability',
-        'Carbon footprint compensation'
+        'Exposição a commodities fracionadas',
+        'NFT Combo de impacto ESG',
+        'Proteção por Fundo de Garantia',
+        'Rastreabilidade completa on-chain',
+        'Compensação de pegada de carbono'
       ],
-      buttonText: 'I am an Investor'
+      buttonText: 'Sou Investidor'
     },
     {
       icon: 'fas fa-building',
-      title: 'For Companies',
+      title: 'Para Empresas',
       benefits: [
-        'Verified and traceable TCO₂',
-        'ESG goals verification',
-        'Direct support to small producers',
-        'Transparent supply chain',
-        'Automatic impact reports'
+        'TCO₂ verificados e rastreáveis',
+        'Comprovação de metas ESG',
+        'Apoio direto a pequenos produtores',
+        'Supply chain transparente',
+        'Relatórios de impacto automáticos'
       ],
-      buttonText: 'I am a Company'
+      buttonText: 'Sou Empresa'
     }
   ];
 
   return (
-    <section id="benefits" className="py-12 px-8 bg-gradient-to-br from-green-800 to-green-700 text-white">
+    <section id="beneficios" className="py-12 px-8 bg-gradient-to-br from-green-800 to-green-700 text-white">
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <h2 className="text-3xl font-bold mb-4">Benefits for everyone</h2>
-        <p className="text-lg text-white/80">A platform that balances financial gains and positive impact</p>
+        <h2 className="text-3xl font-bold mb-4">Benefícios para todos</h2>
+        <p className="text-lg text-white/80">Uma plataforma que equilibra ganhos financeiros e impacto positivo</p>
       </div>
+      
       <div className="flex flex-wrap gap-6 justify-center">
         {benefitCards.map((card, index) => (
-          <BenefitCard
+          <BenefitCard 
             key={index}
             icon={card.icon}
             title={card.title}

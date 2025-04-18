@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import joao from '../assets/foto_joao.png';
-import giovana from '../assets/foto_giovana.png';
-import carlos from '../assets/foto_carlos.png';
-
-
 const TestimonialCard = ({ avatar, quote, name, role }) => {
   return (
     <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 flex gap-6 items-start border border-white/20">
@@ -112,30 +107,30 @@ const TestimonialSlider = ({ testimonials }) => {
 const Testimonials = () => {
   const testimonials = [
     {
-      avatar: joao,
-      quote: "I was able to get advance payment for my coffee harvest without absurd interest rates. The best part is that I also earned carbon tokens for practices I already implement on my property.",
+      avatar: '/assets/avatar-1.jpg',
+      quote: "Consegui antecipar o valor da minha safra de café sem juros absurdos. O melhor é que ainda ganhei tokens de carbono pelas práticas que já faço na minha propriedade.",
       name: "João Silva",
-      role: "Coffee Producer, Minas Gerais"
+      role: "Produtor de Café, Minas Gerais"
     },
     {
-      avatar: giovana,
-      quote: "As an investor, I've always been interested in agriculture, but never had capital for large investments. With SeedSafe, I can buy fractions of harvests and also contribute to the environment.",
-      name: "Giovana Oliveira",
-      role: "Investor, São Paulo"
+      avatar: '/assets/avatar-2.jpg',
+      quote: "Como investidor sempre tive interesse no agro, mas nunca tive capital para grandes investimentos. Com a SeedSafe consigo comprar frações de safras e ainda contribuir com o meio ambiente.",
+      name: "Maria Oliveira",
+      role: "Investidora, São Paulo"
     },
     {
-      avatar: carlos,
-      quote: "We implemented carbon credit purchases via SeedSafe in our ESG strategy. The transparency of blockchain and direct connection with rural producers brought credibility to our sustainable initiatives.",
+      avatar: '/assets/avatar-3.jpg',
+      quote: "Implementamos a compra de créditos de carbono via SeedSafe em nossa estratégia ESG. A transparência do blockchain e a conexão direta com produtores rurais trouxe credibilidade às nossas iniciativas sustentáveis.",
       name: "Carlos Mendes",
-      role: "Sustainability Director, XYZ Company"
+      role: "Diretor de Sustentabilidade, Empresa XYZ"
     }
   ];
 
   return (
-    <section id="testimonials" className="py-12 px-8 bg-gradient-to-br from-amber-700 to-amber-500 text-white">
+    <section id="depoimentos" className="py-12 px-8 bg-gradient-to-br from-amber-700 to-amber-500 text-white">
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <h2 className="text-3xl font-bold mb-4">Testimonials</h2>
-        <p className="text-lg text-white/80">What our users are saying</p>
+        <h2 className="text-3xl font-bold mb-4">Depoimentos</h2>
+        <p className="text-lg text-white/80">O que nossos usuários estão dizendo</p>
       </div>
       
       <TestimonialSlider testimonials={testimonials} />
