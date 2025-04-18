@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import logo from '../assets/logo_svg.svg';
+
 
 const Navbar = ({ openWalletModal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -9,7 +11,7 @@ const Navbar = ({ openWalletModal }) => {
   return (
     <nav className="sticky top-0 z-50 flex justify-between items-center px-8 py-4 bg-white/95 shadow-sm">
       <div className="flex items-center gap-2">
-        <img src="/assets/logo_svg.svg" alt="SeedSafe" className="h-10" />
+        <img src={logo} alt="SeedSafe" className="h-10" />
         <span className="font-bold text-3xl">
           Seed<em className="text-green-700 not-italic">Safe</em>
         </span>

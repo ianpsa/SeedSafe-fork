@@ -1,4 +1,6 @@
 import React from 'react';
+import logo from '../assets/logo_svg.svg';
+
 
 const LinkGroup = ({ title, links }) => {
   return (
@@ -24,48 +26,26 @@ const Footer = () => {
       links: [
         { label: 'How It Works', url: '#how-it-works' },
         { label: 'Products', url: '#products' },
-        { label: 'Marketplace', url: '#marketplace' },
-        { label: 'For Producers', url: '#producers' },
-        { label: 'For Investors', url: '#investors' }
+        { labe: 'Testimonials', url:'#testimonials'}
       ]
     },
     {
       title: 'Resources',
       links: [
-        { label: 'Documentation', url: '#documentation' },
-        { label: 'White Paper', url: '#whitepaper' },
-        { label: 'Blog', url: '#blog' },
-        { label: 'FAQ', url: '#faq' },
-        { label: 'Tutorials', url: '#tutorials' }
+        { label: 'Documentation', url: 'https://miguelclaret.github.io/SeedSafe/' },
       ]
     },
     {
       title: 'Company',
       links: [
-        { label: 'About Us', url: '#about' },
-        { label: 'Our Team', url: '#team' },
-        { label: 'Partners', url: '#partners' },
-        { label: 'Contact', url: '#contact' },
-        { label: 'Press', url: '#press' }
-      ]
-    },
-    {
-      title: 'Legal',
-      links: [
-        { label: 'Terms of Use', url: '#terms' },
-        { label: 'Privacy', url: '#privacy' },
-        { label: 'Cookies', url: '#cookies' },
-        { label: 'Compliance', url: '#compliance' }
+        { label: 'About Us', url: 'https://miguelclaret.github.io/SeedSafe/category/team' },
       ]
     }
   ];
 
   const socialLinks = [
-    { icon: 'fab fa-twitter', url: '#twitter' },
-    { icon: 'fab fa-linkedin', url: '#linkedin' },
-    { icon: 'fab fa-telegram', url: '#telegram' },
-    { icon: 'fab fa-discord', url: '#discord' },
-    { icon: 'fab fa-medium', url: '#medium' }
+    { icon: 'fab fa-twitter', url: 'https://x.com/SeedSafe1492878' },
+
   ];
 
   return (
@@ -73,7 +53,7 @@ const Footer = () => {
       <div className="container mx-auto px-8">
         <div className="flex flex-wrap justify-between gap-8 mb-12">
           <div className="flex-basis-[250px]">
-            <img src="/assets/logo.svg" alt="SeedSafe" className="h-10 mb-4" />
+            <img src={logo} alt="SeedSafe" className="h-10 mb-4" />
             <p className="text-sm opacity-80 max-w-xs">
               Tokenization of future harvests and carbon credits on NERO Chain
             </p>
@@ -101,19 +81,7 @@ const Footer = () => {
                   <i className={link.icon}></i>
                 </a>
               ))}
-            </div>
-            
-            <h4 className="text-lg font-bold mb-2">Get Updates</h4>
-            <div className="flex">
-              <input 
-                type="email" 
-                placeholder="Your email" 
-                className="flex-grow py-2 px-3 rounded-l-md border-none"
-              />
-              <button className="bg-green-700 text-white py-2 px-4 rounded-r-md hover:bg-green-600 transition-colors">
-                Subscribe
-              </button>
-            </div>
+            </div>            
           </div>
         </div>
         
@@ -123,7 +91,7 @@ const Footer = () => {
           </p>
           <div className="flex items-center gap-2 text-xs opacity-70">
             <span>Powered by</span>
-            <img src="/assets/nero-logo.svg" alt="NERO Chain" className="h-5" />
+            <img src="../assets/nero-logo.svg" alt="NERO Chain" className="h-5" />
           </div>
         </div>
       </div>

@@ -57,13 +57,7 @@ const HowItWorks = () => {
           />
         ))}
       </div>
-      <div className="text-center mt-12">
-        <img
-          src="/assets/workflow.svg"
-          alt="SeedSafe process flow"
-          className="max-w-[90%] rounded-md shadow-md inline-block"
-        />
-      </div>
+    
     </section>
   );
 };

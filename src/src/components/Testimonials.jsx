@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
+import joao from '../assets/foto_joao.png';
+import giovana from '../assets/foto_giovana.png';
+import carlos from '../assets/foto_carlos.png';
+
+
 const TestimonialCard = ({ avatar, quote, name, role }) => {
   return (
     <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 flex gap-6 items-start border border-white/20">
@@ -107,19 +112,19 @@ const TestimonialSlider = ({ testimonials }) => {
 const Testimonials = () => {
   const testimonials = [
     {
-      avatar: '/assets/avatar-1.jpg',
+      avatar: joao,
       quote: "I was able to get advance payment for my coffee harvest without absurd interest rates. The best part is that I also earned carbon tokens for practices I already implement on my property.",
       name: "João Silva",
       role: "Coffee Producer, Minas Gerais"
     },
     {
-      avatar: '/assets/avatar-2.jpg',
+      avatar: giovana,
       quote: "As an investor, I've always been interested in agriculture, but never had capital for large investments. With SeedSafe, I can buy fractions of harvests and also contribute to the environment.",
-      name: "Maria Oliveira",
+      name: "Giovana Oliveira",
       role: "Investor, São Paulo"
     },
     {
-      avatar: '/assets/avatar-3.jpg',
+      avatar: carlos,
       quote: "We implemented carbon credit purchases via SeedSafe in our ESG strategy. The transparency of blockchain and direct connection with rural producers brought credibility to our sustainable initiatives.",
       name: "Carlos Mendes",
       role: "Sustainability Director, XYZ Company"

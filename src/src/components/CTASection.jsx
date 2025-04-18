@@ -20,31 +20,7 @@ const CTASection = ({ openWalletModal }) => {
           </button>
         </div>
       </div>
-      <div className="partners">
-        <h4 className="text-gray-600 mb-6 font-medium">Partners and Supporters</h4>
-        <div className="flex justify-center flex-wrap gap-8 items-center">
-          <img
-            src="/assets/partner-1.svg"
-            alt="NERO Chain"
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
-          <img
-            src="/assets/partner-2.svg"
-            alt="Agricultural Cooperative"
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
-          <img
-            src="/assets/partner-3.svg"
-            alt="Environmental Verifier"
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
-          <img
-            src="/assets/partner-4.svg"
-            alt="ESG Investor"
-            className="h-10 opacity-70 hover:opacity-100 transition-opacity"
-          />
-        </div>
-      </div>
+      
     </section>
   );
 };

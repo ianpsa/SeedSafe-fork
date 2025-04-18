@@ -1,4 +1,6 @@
 import React from 'react';
+import hero_image from '../assets/sorrindo.jpg';
+
 
 const Hero = ({ openWalletModal }) => {
   return (
@@ -35,7 +37,7 @@ const Hero = ({ openWalletModal }) => {
       </div>
       <div className="flex-1 flex justify-center items-center">
         <img 
-          src="../../assets/hero-image.jpg" 
+          src={hero_image} 
           alt="Agricultura tokenizada sustentável" 
           className="max-w-[90%] rounded-lg shadow-lg"
         />

@@ -1,4 +1,9 @@
 import React, { useEffect } from 'react';
+import metamask from '../assets/metamask.svg';
+import walletConnect from '../assets/walletconnect.svg';
+import coinbase from '../assets/coinbase.svg';
+
+
 
 const WalletOption = ({ icon, name, onClick }) => {
   return (
@@ -36,9 +41,9 @@ const WalletModal = ({ isOpen, onClose }) => {
   };
 
   const walletOptions = [
-    { icon: '../assets/metamask.svg', name: 'MetaMask' },
-    { icon: 'assets/walletconnect.svg', name: 'WalletConnect' },
-    { icon: 'assets/coinbase.svg', name: 'Coinbase Wallet' }
+    { icon: metamask, name: 'MetaMask' },
+    { icon: walletConnect, name: 'WalletConnect' },
+    { icon: coinbase, name: 'Coinbase Wallet' }
   ];
 
   return (
