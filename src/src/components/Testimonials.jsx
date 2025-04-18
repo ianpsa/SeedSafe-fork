@@ -108,29 +108,29 @@ const Testimonials = () => {
   const testimonials = [
     {
       avatar: '/assets/avatar-1.jpg',
-      quote: "Consegui antecipar o valor da minha safra de café sem juros absurdos. O melhor é que ainda ganhei tokens de carbono pelas práticas que já faço na minha propriedade.",
+      quote: "I was able to get advance payment for my coffee harvest without absurd interest rates. The best part is that I also earned carbon tokens for practices I already implement on my property.",
       name: "João Silva",
-      role: "Produtor de Café, Minas Gerais"
+      role: "Coffee Producer, Minas Gerais"
     },
     {
       avatar: '/assets/avatar-2.jpg',
-      quote: "Como investidor sempre tive interesse no agro, mas nunca tive capital para grandes investimentos. Com a SeedSafe consigo comprar frações de safras e ainda contribuir com o meio ambiente.",
+      quote: "As an investor, I've always been interested in agriculture, but never had capital for large investments. With SeedSafe, I can buy fractions of harvests and also contribute to the environment.",
       name: "Maria Oliveira",
-      role: "Investidora, São Paulo"
+      role: "Investor, São Paulo"
     },
     {
       avatar: '/assets/avatar-3.jpg',
-      quote: "Implementamos a compra de créditos de carbono via SeedSafe em nossa estratégia ESG. A transparência do blockchain e a conexão direta com produtores rurais trouxe credibilidade às nossas iniciativas sustentáveis.",
+      quote: "We implemented carbon credit purchases via SeedSafe in our ESG strategy. The transparency of blockchain and direct connection with rural producers brought credibility to our sustainable initiatives.",
       name: "Carlos Mendes",
-      role: "Diretor de Sustentabilidade, Empresa XYZ"
+      role: "Sustainability Director, XYZ Company"
     }
   ];
 
   return (
-    <section id="depoimentos" className="py-12 px-8 bg-gradient-to-br from-amber-700 to-amber-500 text-white">
+    <section id="testimonials" className="py-12 px-8 bg-gradient-to-br from-amber-700 to-amber-500 text-white">
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <h2 className="text-3xl font-bold mb-4">Depoimentos</h2>
-        <p className="text-lg text-white/80">O que nossos usuários estão dizendo</p>
+        <h2 className="text-3xl font-bold mb-4">Testimonials</h2>
+        <p className="text-lg text-white/80">What our users are saying</p>
       </div>
       
       <TestimonialSlider testimonials={testimonials} />
