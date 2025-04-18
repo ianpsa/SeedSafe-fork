@@ -110,7 +110,7 @@ custom_edit_url: null
 </div>
 <p style={{textAlign: 'center'}}> Source: Produced by the Authors (2025).</p>
 
-- **Degree**: Computer Science – Inteli  
+- **Degree**: Computer Engineering – Inteli  
 - **Relevant technical experience**:
   - Technical background in IT with practical experience in tech support and teaching  
   - Development of inclusive digital solutions integrating hardware and multisensory stimuli  
