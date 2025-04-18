@@ -42,7 +42,7 @@ The ERRC Matrix (Eliminate, Reduce, Raise, Create) guides strategic adjustments 
 <p style={{textAlign: 'center'}}>Eliminate, Raise, Reduce and Create table</p>
 <div style={{margin: 15}}>
     <div style={{textAlign: 'center'}}>
-        <img src={require("../../static/img/eliminateRaiseReduceCreate.svg").default} style={{width: 800}} alt="Eliminate, Raise, Reduce and Create table" />
+        <img src={require("../../static/img/eliminateRaiseReduceCreate.png").default} style={{width: 800}} alt="Eliminate, Raise, Reduce and Create table" />
         <br />
     </div>
 </div>
@@ -73,7 +73,7 @@ The ERRC Matrix (Eliminate, Reduce, Raise, Create) guides strategic adjustments 
 <p style={{textAlign: 'center'}}>Blue Ocean Matrix</p>
 <div style={{margin: 15}}>
     <div style={{textAlign: 'center'}}>
-        <img src={require("../../static/img/BlueOceanMatrix.svg").default} style={{width: 800}} alt="Blue ocean matrix" />
+        <img src={require("../../static/img/BlueOceanMatrix.png").default} style={{width: 800}} alt="Blue ocean matrix" />
         <br />
     </div>
 </div>
