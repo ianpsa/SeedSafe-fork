@@ -5,6 +5,8 @@ custom_edit_url: null
 
 # Accessibility Resources for Different Audiences
 
+## Introduction
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On the SeedSafe platform, we've developed an approach that prioritizes user experience before introducing Web3 concepts. Our philosophy is: first we present the platform's value and practical functionalities, then we gradually introduce the technological elements.
 
 ## Simplified Experience First, Technology Later
