@@ -1,176 +1,140 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { GoogleGenAI } from '@google/genai';
+
+// Initialize Gemini client
+const ai = new GoogleGenAI({ apiKey: process.env.REACT_APP_GEMINI_API_KEY });
+const GEMINI_CONTEXT = `
+A complete, transparent and scalable Web3 solution for tokenization of future harvests, carbon credit issuance, and decentralized financing for small producers built on the NERO Chain with Account Abstraction and Paymaster support that offers a 100% gasless experience for the end user oriented towards social, economic, and environmental impact. The platform allows producers to create their Smart Account without technical knowledge or gas payment to register future harvests defining type, quantity, delivery date, and price, notifying the auditor who validates sustainable practices and simultaneously authorizes the issuance of an ERC-1155 token for the harvest and an ERC-20 token for carbon credits. Next, the producer lists the harvest on the marketplace and receives funds for each sale, while the auditor logs in with AUDITOR_ROLE to analyze practices, call authorizeHarvest, and release token minting. The investor accesses gasless via Smart Account, buys harvest tokens in the marketplace, receives a ComboNFT with harvest and carbon metadata, and monitors the status of total, partial, or total failure delivery with automatic reimbursement via guarantee fund or debt NFT issuance. The management team defines the global fee in the CustomPaymaster to keep the Paymaster funded, manages onboarding with educational chatbot and Web2-like UX, and ensures fee transparency. The system includes smart contracts such as FutureHarvestToken.sol (ERC-1155), TCO2Token.sol (ERC-20), CarbonVerifier.sol, Marketplace.sol, GuaranteeFund.sol, ComboNFT.sol (ERC-721), Reputation.sol, and CustomPaymaster.sol, plus Smart Accounts, custom Paymaster, front-end in React with Tailwind and Vite, integration via Ethers.js, and metadata storage in IPFS and nft.storage. This integrated flow on the NERO Chain ensures complete traceability and ESG impact, covering scenarios of total, partial, total loss delivery, or rewards for sustainable practices, making the solution modular, scalable, and socially conscious with gasless experience for mass adoption.
+`;
 
 const ChatMessage = ({ content, sender, isTyping }) => {
   if (isTyping) {
     return (
       <div className="bg-white border-l-4 border-green-700 rounded-md p-3 max-w-[80%] self-start flex gap-1 items-center">
-        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+        {[0, 0.2, 0.4].map(delay => (
+          <span
+            key={delay}
+            className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+            style={{ animationDelay: `${delay}s` }}
+          />
+        ))}
       </div>
     );
   }
-  
-  return (
-    <div className={`${
-      sender === 'bot' 
-        ? 'bg-white border-l-4 border-green-700 self-start' 
-        : 'bg-green-600 text-white self-end'
-    } rounded-md p-3 max-w-[80%] shadow-sm`}>
-      {content}
-    </div>
-  );
+
+  const classes = sender === 'bot'
+    ? 'bg-white border-l-4 border-green-700 self-start'
+    : 'bg-green-600 text-white self-end';
+  return <div className={`${classes} rounded-md p-3 max-w-[80%] shadow-sm`}>{content}</div>;
 };
 
 const ChatWindow = () => {
   const [messages, setMessages] = useState([
-    { content: "Olá! Sou o AgroBot, assistente da SeedSafe. Como posso ajudar você hoje?", sender: 'bot' }
+    { content: 'Hello! I am AgroBot, SeedSafe\'s assistant. How can I help?', sender: 'bot' }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
-  
-  // Bot responses dictionary
-  const botResponses = {
-    default: "Desculpe, ainda não tenho uma resposta para isso. Pode reformular sua pergunta ou perguntar sobre tokens de safra, créditos de carbono, wallets ou investimentos?",
-    greeting: "Olá! Sou o AgroBot, assistente da SeedSafe. Como posso ajudar você hoje?",
-    token: "Os tokens de safra futura são ativos digitais (ERC-1155) que representam uma parte da produção agrícola que ainda será colhida. Por exemplo, você pode comprar tokens que representam 10kg de café que serão entregues após a colheita!",
-    carbon: "Os tokens de crédito de carbono (TCO₂) representam uma tonelada de CO₂ que deixou de ser emitida ou foi sequestrada da atmosfera. Produtores rurais que adotam práticas sustentáveis podem gerar esses créditos e vendê-los como renda extra.",
-    wallet: "Uma wallet (carteira digital) é onde você guarda seus ativos digitais como tokens e NFTs. Na SeedSafe, oferecemos uma Smart Account que não exige conhecimento técnico e funciona sem taxas de gás graças à tecnologia Account Abstraction.",
-    invest: "Para investir, você precisa conectar sua wallet, explorar as safras disponíveis no marketplace e escolher qual deseja apoiar. Você receberá tokens ERC-1155 que representam sua participação na colheita futura.",
-    gasless: "Nossa plataforma é totalmente sem taxas (gasless) graças à tecnologia de Account Abstraction e Paymaster da NERO Chain. Isso permite que produtores rurais utilizem a plataforma sem precisar ter criptomoedas previamente."
-  };
-  
-  // Keywords mapping
+  const endRef = useRef(null);
+
   const keywords = {
-    token: ["token", "safra", "futura", "erc-1155", "erc1155", "tokenização"],
-    carbon: ["carbon", "carbono", "tco2", "tco₂", "crédito", "ambiental", "verde"],
-    wallet: ["wallet", "carteira", "conta", "smart account", "conectar"],
-    invest: ["invest", "investir", "comprar", "adquirir", "apoiar"],
-    gasless: ["gas", "taxa", "tarifa", "custo", "gratuito", "sem taxa", "gasless"]
+    token: ['token', 'harvest', 'future', 'erc-1155', 'erc1155', 'tokenization'],
+    carbon: ['carbon', 'tco2', 'tco₂', 'credit', 'environmental', 'green'],
+    wallet: ['wallet', 'smart account', 'connect'],
+    invest: ['invest', 'buy', 'acquire', 'support'],
+    gasless: ['gas', 'fee', 'free', 'no fee', 'gasless']
   };
-  
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-  
-  const handleSendMessage = (e) => {
+
+  const handleSendMessage = async (e) => {
     e?.preventDefault();
-    if (inputValue.trim() === '') return;
-    
+    const text = inputValue.trim();
+    if (!text) return;
+
     // Add user message
-    setMessages(prev => [...prev, { content: inputValue, sender: 'user' }]);
+    setMessages(m => [...m, { content: text, sender: 'user' }]);
     setInputValue('');
-    
-    // Show bot typing indicator
     setIsTyping(true);
-    
-    // Determine response based on keywords
-    setTimeout(() => {
-      const userMessage = inputValue.toLowerCase();
-      let response = botResponses.default;
-      
-      // Check for greetings
-      if (userMessage.includes('olá') || 
-          userMessage.includes('oi') || 
-          userMessage.includes('bom dia') || 
-          userMessage.includes('boa tarde') || 
-          userMessage.includes('boa noite')) {
-        response = botResponses.greeting;
-      } 
-      // Check for keywords
-      else {
-        for (const [key, values] of Object.entries(keywords)) {
-          if (values.some(word => userMessage.includes(word))) {
-            response = botResponses[key];
-            break;
-          }
+
+    // Pause briefly to show typing
+    setTimeout(async () => {
+      const lower = text.toLowerCase();
+      let reply = null;
+
+
+      // if no keyword, call Gemini
+      if (!reply) {
+        try {
+          const res = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: `${GEMINI_CONTEXT}, don't use any markdown elements, just plain text, Answer only about the SeedSafe platform that I presented here: ${text}`
+          });
+          reply = res.text;
+        } catch (err) {
+          console.error('Gemini error', err);
+          reply = 'Sorry, an error occurred. Please try again in a moment.';
         }
       }
-      
-      // Hide typing indicator and add bot response
+
+      // add bot response
       setIsTyping(false);
-      setMessages(prev => [...prev, { content: response, sender: 'bot' }]);
-    }, 1500);
+      setMessages(m => [...m, { content: reply, sender: 'bot' }]);
+    }, 800);
   };
-  
+
   return (
     <div className="bg-white rounded-lg shadow-xl overflow-hidden h-[500px] border border-gray-200 flex flex-col">
       <div className="bg-green-700 text-white p-3 flex items-center gap-3">
         <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-green-700">
-          <i className="fas fa-robot"></i>
+          <i className="fas fa-robot" />
         </div>
         <h4 className="font-bold">AgroBot</h4>
       </div>
-      
       <div className="flex-grow p-3 overflow-y-auto flex flex-col gap-3 bg-gray-50">
-        {messages.map((message, index) => (
-          <ChatMessage 
-            key={index} 
-            content={message.content} 
-            sender={message.sender} 
-          />
+        {messages.map((msg, i) => (
+          <ChatMessage key={i} {...msg} />
         ))}
         {isTyping && <ChatMessage isTyping={true} sender="bot" />}
-        <div ref={messagesEndRef} />
+        <div ref={endRef} />
       </div>
-      
       <form onSubmit={handleSendMessage} className="flex p-2 border-t border-gray-200">
-        <input 
-          type="text" 
+        <input
+          type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Digite sua pergunta..."
+          onChange={e => setInputValue(e.target.value)}
+          placeholder="Type your question..."
           className="flex-grow p-3 border border-gray-200 rounded-md mr-2 focus:outline-none focus:ring-2 focus:ring-green-500"
         />
-        <button 
-          type="submit"
-          className="w-10 h-10 rounded-full bg-green-700 text-white border-none flex items-center justify-center"
-        >
-          <i className="fas fa-paper-plane"></i>
+        <button type="submit" className="w-10 h-10 rounded-full bg-green-700 text-white flex items-center justify-center">
+          <i className="fas fa-paper-plane" />
         </button>
       </form>
     </div>
   );
 };
 
-const ChatbotFeature = () => {
-  return (
-    <section className="py-12 px-8 bg-white">
-      <div className="max-w-6xl mx-auto flex flex-wrap gap-12 items-center">
-        <div className="flex-1 min-w-[300px]">
-          <h2 className="text-3xl font-bold mb-4">
-            Dúvidas? <span className="text-green-700">Nosso assistente virtual pode ajudar</span>
-          </h2>
-          <p className="mb-6">
-            Conheça o AgroBot, nosso chatbot educacional que vai te guiar pelo mundo da blockchain, tokens e agricultura sustentável.
-          </p>
-          <ul className="mb-6">
-            <li className="mb-2 flex items-center gap-2">
-              <i className="fas fa-graduation-cap text-green-700"></i>
-              Aprenda sobre Web3 e tokenização
-            </li>
-            <li className="mb-2 flex items-center gap-2">
-              <i className="fas fa-hands-helping text-green-700"></i>
-              Suporte para onboarding
-            </li>
-            <li className="mb-2 flex items-center gap-2">
-              <i className="fas fa-question-circle text-green-700"></i>
-              Tire dúvidas sobre o processo
-            </li>
-          </ul>
-          <button className="py-3 px-6 rounded-md font-semibold bg-amber-600 text-white hover:bg-amber-700 hover:-translate-y-0.5 transition-all">
-            Conversar com AgroBot
-          </button>
-        </div>
-        
-        <div className="flex-1 min-w-[350px]">
-          <ChatWindow />
-        </div>
+const ChatbotFeature = () => (
+  <section className="py-12 px-8 bg-white">
+    <div className="max-w-6xl mx-auto flex flex-wrap gap-12 items-center">
+      <div className="flex-1 min-w-[300px]">
+        <h2 className="text-3xl font-bold mb-4">
+          Questions? <span className="text-green-700">Our virtual assistant can help</span>
+        </h2>
+        <p className="mb-6">
+          Meet AgroBot, our educational chatbot that will guide you through the world of blockchain, tokens, and sustainable agriculture.
+        </p>
+        <ul className="mb-6">
+          <li className="mb-2 flex items-center gap-2"><i className="fas fa-graduation-cap text-green-700" /> Learn about Web3 and tokenization</li>
+          <li className="mb-2 flex items-center gap-2"><i className="fas fa-hands-helping text-green-700" /> Support for onboarding</li>
+          <li className="mb-2 flex items-center gap-2"><i className="fas fa-question-circle text-green-700" /> Get answers about the process</li>
+        </ul>
+        <button className="py-3 px-6 rounded-md font-semibold bg-amber-600 text-white hover:bg-amber-700 transition-all">
+          Chat with AgroBot
+        </button>
       </div>
-    </section>
-  );
-};
+      <div className="flex-1 min-w-[350px]">
+        <ChatWindow />
+      </div>
+    </div>
+  </section>
+);
 
 export default ChatbotFeature;
