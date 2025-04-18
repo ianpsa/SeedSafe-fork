@@ -1,6 +1,11 @@
 import React from 'react';
+<<<<<<< Updated upstream
 import hero_image from '../assets/sorrindo.jpg';
 
+=======
+// Importação direta da imagem
+import heroImage from '../assets/hero-image.svg'; // Ajuste o caminho conforme necessário
+>>>>>>> Stashed changes
 
 const Hero = ({ openWalletModal }) => {
   return (
@@ -37,9 +42,13 @@ const Hero = ({ openWalletModal }) => {
       </div>
       <div className="flex-1 flex justify-center items-center">
         <img 
+<<<<<<< Updated upstream
           src={hero_image} 
+=======
+          src={heroImage} 
+>>>>>>> Stashed changes
           alt="Agricultura tokenizada sustentável" 
-          className="max-w-[90%] rounded-lg shadow-lg"
+          className="rounded-lg shadow-lg size-max"
         />
       </div>
     </div>

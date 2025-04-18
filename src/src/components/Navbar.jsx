@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
+<<<<<<< Updated upstream
 import logo from '../assets/logo_svg.svg';
 
+=======
+// Importação direta do logo
+import logoSvg from '../assets/logo_svg.svg';
+>>>>>>> Stashed changes
 
 const Navbar = ({ openWalletModal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -11,7 +16,11 @@ const Navbar = ({ openWalletModal }) => {
   return (
     <nav className="sticky top-0 z-50 flex justify-between items-center px-8 py-4 bg-white/95 shadow-sm">
       <div className="flex items-center gap-2">
+<<<<<<< Updated upstream
         <img src={logo} alt="SeedSafe" className="h-10" />
+=======
+        <img src={logoSvg} alt="SeedSafe" className="h-10" />
+>>>>>>> Stashed changes
         <span className="font-bold text-3xl">
           Seed<em className="text-green-700 not-italic">Safe</em>
         </span>

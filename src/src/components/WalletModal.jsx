@@ -1,9 +1,16 @@
 import React, { useEffect } from 'react';
+<<<<<<< Updated upstream
 import metamask from '../assets/metamask.svg';
 import walletConnect from '../assets/walletconnect.svg';
 import coinbase from '../assets/coinbase.svg';
 
 
+=======
+// Importação direta dos ícones
+import metamaskIcon from '../assets/metamask.svg';
+import walletConnectIcon from '../assets/walletconnect.svg';
+import coinbaseIcon from '../assets/coinbase.svg';
+>>>>>>> Stashed changes
 
 const WalletOption = ({ icon, name, onClick }) => {
   return (
@@ -24,10 +31,16 @@ const WalletModal = ({ isOpen, onClose }) => {
         onClose();
       }
     };
+    
+    // Desabilitar o scroll quando o modal estiver aberto
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       document.addEventListener('keydown', handleEsc);
     }
+    
     return () => {
+      // Restaurar o scroll quando o modal for fechado
+      document.body.style.overflow = 'auto';
       document.removeEventListener('keydown', handleEsc);
     };
   }, [isOpen, onClose]);
@@ -41,32 +54,41 @@ const WalletModal = ({ isOpen, onClose }) => {
   };
 
   const walletOptions = [
+<<<<<<< Updated upstream
     { icon: metamask, name: 'MetaMask' },
     { icon: walletConnect, name: 'WalletConnect' },
     { icon: coinbase, name: 'Coinbase Wallet' }
+=======
+    { icon: metamaskIcon, name: 'MetaMask' },
+    { icon: walletConnectIcon, name: 'WalletConnect' },
+    { icon: coinbaseIcon, name: 'Coinbase Wallet' }
+>>>>>>> Stashed changes
   ];
 
   return (
     <div
-      className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-[2000]"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[2000] p-4 overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg w-full max-w-md overflow-hidden animate-fadeIn"
+        className="bg-white rounded-lg w-full max-w-md mx-auto my-auto overflow-hidden animate-fadeIn"
         style={{
           animation: 'fadeIn 0.3s ease-out',
+          maxHeight: '90vh', // Limita a altura máxima em telas pequenas
+          position: 'relative', // Garante que o modal fique posicionado corretamente
         }}
       >
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h3 className="text-xl font-bold m-0">Connect Wallet</h3>
           <button
-            className="bg-transparent border-none text-xl text-gray-500"
+            className="bg-transparent border-none text-xl text-gray-500 p-2"
             onClick={onClose}
+            aria-label="Close"
           >
             <i className="fas fa-times"></i>
           </button>
         </div>
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
           {walletOptions.map((wallet, index) => (
             <WalletOption
               key={index}
