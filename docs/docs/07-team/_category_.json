@@ -1,0 +1,8 @@
+{
+    "label": "Team",
+    "position": 8,
+    "link": {
+      "type": "generated-index",
+      "description": "Information about the team and capabilities."
+    }
+  }
