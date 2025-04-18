@@ -6,7 +6,7 @@ import coinbaseIcon from '../assets/coinbase.svg';
 
 const WalletOption = ({ icon, name, onClick }) => {
   return (
-    <button
+    <button 
       className="w-full py-3 px-4 mb-4 border border-gray-200 rounded-md bg-white flex items-center gap-4 hover:border-green-700 hover:-translate-y-0.5 transition-all"
       onClick={onClick}
     >
@@ -24,7 +24,6 @@ const WalletModal = ({ isOpen, onClose }) => {
       }
     };
     
-    // Desabilitar o scroll quando o modal estiver aberto
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       document.addEventListener('keydown', handleEsc);
@@ -36,21 +35,21 @@ const WalletModal = ({ isOpen, onClose }) => {
       document.removeEventListener('keydown', handleEsc);
     };
   }, [isOpen, onClose]);
-
+  
   if (!isOpen) return null;
-
+  
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
-
+  
   const walletOptions = [
     { icon: metamaskIcon, name: 'MetaMask' },
     { icon: walletConnectIcon, name: 'WalletConnect' },
     { icon: coinbaseIcon, name: 'Coinbase Wallet' }
   ];
-
+  
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-[2000] p-4 overflow-y-auto"
@@ -75,21 +74,23 @@ const WalletModal = ({ isOpen, onClose }) => {
           </button>
         </div>
         <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+
           {walletOptions.map((wallet, index) => (
-            <WalletOption
+            <WalletOption 
               key={index}
               icon={wallet.icon}
               name={wallet.name}
               onClick={() => console.log(`Connecting to ${wallet.name}...`)}
             />
           ))}
+          
           <div className="mt-8 p-6 bg-gray-100 rounded-md text-center">
-            <h4 className="text-lg font-bold mb-2">New to crypto?</h4>
+            <h4 className="text-lg font-bold mb-2">Novo no mundo cripto?</h4>
             <p className="text-sm mb-4">
-              Create a free Smart Account, without gas fees
+              Crie uma Smart Account gratuita, sem taxas de gás
             </p>
             <button className="w-full py-3 px-4 rounded-md font-semibold bg-green-700 text-white hover:bg-green-800 transition-colors flex items-center justify-center gap-2">
-              Create Smart Account <i className="fas fa-arrow-right"></i>
+              Criar Smart Account <i className="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>

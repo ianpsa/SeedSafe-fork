@@ -1,17 +1,12 @@
-import React, { useState } from "react";
-
-import futuraSafra from "../assets/futureharvest.png";
-import tco2 from "../assets/tco2.png";
-import comboNTF from "../assets/combonft.png";
-import marketplace from "../assets/marketplace.png";
+import React, { useState } from 'react';
 
 const ProductTab = ({ title, isActive, onClick }) => {
   return (
-    <button
+    <button 
       className={`py-3 px-6 rounded-md font-semibold transition-all ${
-        isActive
-          ? "bg-green-700 text-white"
-          : "bg-white text-gray-500 hover:bg-green-700/10 hover:text-green-700"
+        isActive 
+          ? 'bg-green-700 text-white'
+          : 'bg-white text-gray-500 hover:bg-green-700/10 hover:text-green-700'
       }`}
       onClick={onClick}
     >
@@ -22,15 +17,15 @@ const ProductTab = ({ title, isActive, onClick }) => {
 
 const TabContent = ({ id, isActive, children }) => {
   return (
-    <div
-      id={id}
+    <div 
+      id={id} 
       className={`${
-        isActive ? "block" : "hidden"
+        isActive ? 'block' : 'hidden'
       } bg-white p-6 rounded-lg shadow-md`}
       style={{
         opacity: isActive ? 1 : 0,
-        transform: isActive ? "translateY(0)" : "translateY(20px)",
-        transition: "opacity 0.3s ease, transform 0.3s ease",
+        transform: isActive ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'opacity 0.3s ease, transform 0.3s ease'
       }}
     >
       {children}
@@ -52,86 +47,77 @@ const FeatureList = ({ features }) => {
 };
 
 const Products = () => {
-  const [activeTab, setActiveTab] = useState("future-harvest");
+  const [activeTab, setActiveTab] = useState('futura-safra');
 
   const tabs = [
-    { id: "future-harvest", title: "FutureHarvest Tokens" },
-    { id: "tco2", title: "AgroCarbon TCO₂" },
-    { id: "combo-nft", title: "Combo NFT" },
-    { id: "marketplace", title: "Marketplace" },
+    { id: 'futura-safra', title: 'FuturaSafra Tokens' },
+    { id: 'tco2', title: 'AgroCarbon TCO₂' },
+    { id: 'combo-nft', title: 'Combo NFT' },
+    { id: 'marketplace', title: 'Marketplace' },
   ];
 
   const products = {
-    "future-harvest": {
-      title: "FutureHarvest Tokens (ERC-1155)",
-      description:
-        "Tokens that represent fractions of future harvests, allowing producers to raise funds in advance and investors to diversify their portfolio with exposure to agricultural commodities.",
-      image: futuraSafra,
+    'futura-safra': {
+      title: 'FuturaSafra Tokens (ERC-1155)',
+      description: 'Tokens que representam frações de safras futuras, permitindo que produtores captem recursos antecipadamente e que investidores diversifiquem seu portfólio com exposição a commodities agrícolas.',
+      image: '/assets/futura-safra.png',
       features: [
-        { icon: "fas fa-shield-alt", text: "Integrated guarantee fund" },
-        {
-          icon: "fas fa-sync-alt",
-          text: "Automatic proportional distribution",
-        },
-        { icon: "fas fa-qrcode", text: "Complete traceability" },
-        { icon: "fas fa-star", text: "On-chain reputation system" },
+        { icon: 'fas fa-shield-alt', text: 'Fundo de garantia integrado' },
+        { icon: 'fas fa-sync-alt', text: 'Distribuição proporcional automática' },
+        { icon: 'fas fa-qrcode', text: 'Rastreabilidade completa' },
+        { icon: 'fas fa-star', text: 'Sistema de reputação on-chain' }
       ],
-      buttonText: "Explore Harvests",
+      buttonText: 'Explorar Safras'
     },
-    tco2: {
-      title: "AgroCarbon TCO₂ (ERC-20)",
-      description:
-        "Tokens that represent 1 ton of CO₂ sequestered or not emitted, generated through sustainable agricultural practices verified by independent third parties.",
-      image: tco2,
+    'tco2': {
+      title: 'AgroCarbon TCO₂ (ERC-20)',
+      description: 'Tokens que representam 1 tonelada de CO₂ sequestrada ou não emitida, gerados através de práticas agrícolas sustentáveis verificadas por terceiros independentes.',
+      image: '/assets/tco2.png',
       features: [
-        { icon: "fas fa-check-double", text: "Third-party verification" },
-        { icon: "fas fa-exchange-alt", text: "Fully tradable" },
-        { icon: "fas fa-leaf", text: "Origin traceability" },
-        { icon: "fas fa-certificate", text: "On-chain certification" },
+        { icon: 'fas fa-check-double', text: 'Verificação por terceiros' },
+        { icon: 'fas fa-exchange-alt', text: 'Totalmente negociáveis' },
+        { icon: 'fas fa-leaf', text: 'Rastreabilidade da origem' },
+        { icon: 'fas fa-certificate', text: 'Certificação on-chain' }
       ],
-      buttonText: "Explore Credits",
+      buttonText: 'Explorar Créditos'
     },
-    "combo-nft": {
-      title: "Combo NFT (ERC-721)",
-      description:
-        "Exclusive digital certificates that prove participation in future harvests AND positive environmental impact, combining harvest fractions and carbon credits in a single token.",
-      image: comboNTF,
+    'combo-nft': {
+      title: 'Combo NFT (ERC-721)',
+      description: 'Certificados digitais exclusivos que comprovam a participação em safras futuras E o impacto ambiental positivo, combinando frações de safra e créditos de carbono em um único token.',
+      image: '/assets/combo-nft.png',
       features: [
-        { icon: "fas fa-trophy", text: "ESG impact proof" },
-        { icon: "fas fa-cubes", text: "Digital collectibles" },
-        { icon: "fas fa-fingerprint", text: "Certificate of authenticity" },
-        { icon: "fas fa-share-alt", text: "Shareable on social networks" },
+        { icon: 'fas fa-trophy', text: 'Comprovação de impacto ESG' },
+        { icon: 'fas fa-cubes', text: 'Colecionáveis digitais' },
+        { icon: 'fas fa-fingerprint', text: 'Certificado de autenticidade' },
+        { icon: 'fas fa-share-alt', text: 'Compartilhável em redes sociais' }
       ],
-      buttonText: "View Collection",
+      buttonText: 'Ver Coleção'
     },
-    marketplace: {
-      title: "Integrated Marketplace",
-      description:
-        "A digital market where producers can list their future harvests and carbon credits, and investors can explore opportunities with full transparency on origin and impact.",
-      image: marketplace,
+    'marketplace': {
+      title: 'Marketplace Integrado',
+      description: 'Um mercado digital onde produtores podem listar suas safras futuras e créditos de carbono, e investidores podem explorar oportunidades com transparência total sobre origem e impacto.',
+      image: '/assets/marketplace.png',
       features: [
-        { icon: "fas fa-search", text: "Filters by crop type" },
-        { icon: "fas fa-map-marker-alt", text: "Geographic visualization" },
-        { icon: "fas fa-chart-line", text: "Transaction history" },
-        { icon: "fas fa-user-check", text: "Producer ratings" },
+        { icon: 'fas fa-search', text: 'Filtros por tipo de cultura' },
+        { icon: 'fas fa-map-marker-alt', text: 'Visualização geográfica' },
+        { icon: 'fas fa-chart-line', text: 'Histórico de transações' },
+        { icon: 'fas fa-user-check', text: 'Avaliações de produtores' }
       ],
-      buttonText: "Access Marketplace",
-    },
+      buttonText: 'Acessar Marketplace'
+    }
   };
 
   return (
-    <section id="products" className="py-12 px-8 bg-gray-100">
+    <section id="produtos" className="py-12 px-8 bg-gray-100">
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <h2 className="text-3xl font-bold mb-4">Our Products</h2>
-        <p className="text-lg text-gray-500">
-          Innovative blockchain solutions for sustainable agribusiness
-        </p>
+        <h2 className="text-3xl font-bold mb-4">Nossos Produtos</h2>
+        <p className="text-lg text-gray-500">Soluções inovadoras em blockchain para o agronegócio sustentável</p>
       </div>
-
+      
       <div className="max-w-[1100px] mx-auto">
         <div className="flex justify-center gap-2 flex-wrap mb-8">
           {tabs.map((tab) => (
-            <ProductTab
+            <ProductTab 
               key={tab.id}
               title={tab.title}
               isActive={activeTab === tab.id}
@@ -139,25 +125,23 @@ const Products = () => {
             />
           ))}
         </div>
-
+        
         <div className="tabs-content">
           {Object.keys(products).map((productId) => {
             const product = products[productId];
             return (
-              <TabContent
+              <TabContent 
                 key={productId}
                 id={productId}
                 isActive={activeTab === productId}
               >
                 <div className="flex flex-col md:flex-row gap-6 items-center">
                   <div className="flex-1 min-w-[300px]">
-                    <div className="aspect-square w-full overflow-hidden rounded-lg shadow-sm bg-white">
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        className="w-full h-full object-cover object-top"
-                      />
-                    </div>
+                    <img 
+                      src={product.image} 
+                      alt={product.title} 
+                      className="rounded-lg shadow-sm w-full"
+                    />
                   </div>
                   <div className="flex-1 min-w-[300px]">
                     <h3 className="text-xl font-bold mb-4">{product.title}</h3>

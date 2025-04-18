@@ -23,24 +23,38 @@ const LinkGroup = ({ title, links }) => {
 const Footer = () => {
   const linkGroups = [
     {
-      title: 'Platform',
+      title: 'Plataforma',
       links: [
         { label: 'How It Works', url: 'https://miguelclaret.github.io/SeedSafe/' },
         { label: 'For Producers', url: '#producers' },
         { label: 'For Investors', url: '#investors' }
+
       ]
     },
     {
-      title: 'Resources',
+      title: 'Recursos',
       links: [
         { label: 'Documentation', url: 'https://miguelclaret.github.io/SeedSafe/' },
         { label: 'FAQ', url: 'https://x.com/SeedSafe1492878' }
       ]
     },
     {
-      title: 'Company',
+      title: 'Empresa',
       links: [
-        { label: 'About Us', url: 'https://miguelclaret.github.io/SeedSafe/category/team' },
+        { label: 'Sobre Nós', url: '#sobre' },
+        { label: 'Nossa Equipe', url: '#equipe' },
+        { label: 'Parceiros', url: '#parceiros' },
+        { label: 'Contato', url: '#contato' },
+        { label: 'Imprensa', url: '#imprensa' }
+      ]
+    },
+    {
+      title: 'Legal',
+      links: [
+        { label: 'Termos de Uso', url: '#termos' },
+        { label: 'Privacidade', url: '#privacidade' },
+        { label: 'Cookies', url: '#cookies' },
+        { label: 'Compliance', url: '#compliance' }
       ]
     }
   ];
@@ -75,7 +89,7 @@ const Footer = () => {
           </div>
           
           <div className="flex-basis-[250px]">
-            <h4 className="text-lg font-bold mb-4">Follow Us</h4>
+            <h4 className="text-lg font-bold mb-4">Siga-nos</h4>
             <div className="flex gap-4 mb-8">
               {socialLinks.map((link, index) => (
                 <a
@@ -94,7 +108,7 @@ const Footer = () => {
         
         <div className="pt-6 border-t border-white/10 flex flex-wrap justify-between items-center gap-4">
           <p className="text-xs opacity-70 mb-0">
-            &copy; 2025 SeedSafe. All rights reserved.
+            &copy; 2025 SeedSafe. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-2 text-xs opacity-70">
             <span>Powered by</span>
