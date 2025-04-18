@@ -16,12 +16,12 @@ const config = {
 
   // Set the production url of your site here
    url: 'https://miguelclaret.github.io',
-  baseUrl: '/Nero-NDC-LoiraBigData/',
+  baseUrl: '/Seed-Safe/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'Nero-NDC-LoiraBigData', // Usually your repo name.
+  projectName: 'Seed-Safe', // Usually your repo name.
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
