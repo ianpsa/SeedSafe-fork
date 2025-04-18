@@ -58,13 +58,12 @@ At Seed Safe, we use AA to:
 
 ## Sustaining the Gasless Model
 
-&emsp;Although Seed Safe **does not use a custom Paymaster**, the use of **NERO’s Paymaster** ensures gas coverage for end users. To support the sustainability of the model, the platform applies a percentage fee (e.g., 2%) on commercial transactions, which is accumulated in the `AgriFinance.sol` contract.
+&emsp;Although Seed Safe **does not use a custom Paymaster**, the use of **NERO’s Paymaster** ensures gas coverage for end users. To support the sustainability of the model, the platform applies a percentage fee on commercial transactions, which is accumulated in the `AgriFinance.sol` contract.
 
 &emsp;This fund may be used in the future to:
 
 - Subsidize the Paymaster
-- Support institutional actions to maintain the gasless experience
-- Finance compensations and guarantees in agricultural cycles
+- Platform maintenance (servers, support, technical team)
 
 ## Benefits of the AA Approach
 
