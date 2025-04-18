@@ -4,28 +4,53 @@
  * work well for content-centric websites.
  */
 
- :root {
-  --ifm-color-primary: #9e53bc;
-  --ifm-color-primary-dark: #9446b3;
-  --ifm-color-primary-darker: #8e43ac;
-  --ifm-color-primary-darkest: #813d9c;
-  --ifm-color-primary-light: #74378c;
-  --ifm-color-primary-lighter: #6e3485;
-  --ifm-color-primary-lightest: #5a2b6d;
+/* SafeSeed Brand Color System */
+:root {
+  /* Primary Colors - Green (Sustainability and Growth) */
+  --ifm-color-primary: #2E7D32; /* Verde Base */
+  --ifm-color-primary-dark: #1B5E20; /* Verde Escuro */
+  --ifm-color-primary-darker: #175418; /* Verde mais Escuro */
+  --ifm-color-primary-darkest: #0F3E0F; /* Verde muito Escuro */
+  --ifm-color-primary-light: #4CAF50; /* Verde Claro */
+  --ifm-color-primary-lighter: #66BB6A; /* Verde mais Claro */
+  --ifm-color-primary-lightest: #81C784; /* Verde muito Claro */
+  
+  /* Secondary Colors - Amber (Harvest and Solar Energy) */
+  --safeseed-amber: #FF8F00; /* Âmbar Base */
+  --safeseed-amber-dark: #F57C00; /* Âmbar Escuro */
+  --safeseed-amber-darker: #EF6C00; /* Âmbar mais Escuro */
+  --safeseed-amber-darkest: #E65100; /* Âmbar muito Escuro */
+  --safeseed-amber-light: #FFB74D; /* Âmbar Claro */
+  --safeseed-amber-lighter: #FFC77D; /* Âmbar mais Claro */
+  --safeseed-amber-lightest: #FFD8A8; /* Âmbar muito Claro */
+  
+  /* Neutral Colors */
+  --safeseed-neutral-dark: #263238; /* Azul-cinza Escuro */
+  --safeseed-neutral-medium: #455A64; /* Azul-cinza Médio */
+  --safeseed-neutral-light: #78909C; /* Azul-cinza Claro */
+  --safeseed-neutral-very-light: #ECEFF1; /* Azul-cinza Muito Claro */
+  
+  /* System */
   --ifm-code-font-size: 95%;
-  --ifm-background-color: #fdfdfd;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-background-color: #FFFFFF; /* Branco */
+  --docusaurus-highlighted-code-line-bg: rgba(46, 125, 50, 0.1); /* Verde Base com 10% opacidade */
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #dc8add;
-  --ifm-color-primary-dark: #d46ed5;
-  --ifm-color-primary-darker: #d060d1;
-  --ifm-color-primary-darkest: #cb52cd;
-  --ifm-color-primary-light: #e4a6e5;
-  --ifm-color-primary-lighter: #e8b4e9;
-  --ifm-color-primary-lightest: #f5ddf5;
-  --ifm-background-color: #000000;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* Primary Colors in Dark Mode */
+  --ifm-color-primary: #4CAF50; /* Verde Claro como primário */
+  --ifm-color-primary-dark: #2E7D32; /* Verde Base */
+  --ifm-color-primary-darker: #1B5E20; /* Verde Escuro */
+  --ifm-color-primary-darkest: #175418; /* Verde mais Escuro */
+  --ifm-color-primary-light: #66BB6A; /* Verde mais Claro */
+  --ifm-color-primary-lighter: #81C784; /* Verde muito Claro */
+  --ifm-color-primary-lightest: #A5D6A7; /* Verde extremamente Claro */
+  
+  /* Background colors in Dark Mode */
+  --ifm-background-color: #263238; /* Azul-cinza Escuro */
+  --ifm-background-surface-color: #37474F; /* Azul-cinza menos Escuro */
+  
+  /* Code highlight in Dark Mode */
+  --docusaurus-highlighted-code-line-bg: rgba(76, 175, 80, 0.15); /* Verde Claro com 15% opacidade */
 }
