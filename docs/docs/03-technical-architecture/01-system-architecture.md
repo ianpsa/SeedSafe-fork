@@ -39,7 +39,9 @@ SeedSafe is a decentralized Web3 platform built on the NERO Chain. Its objective
 
 This diagram represents the dynamic flow of information and calls between agents (producers, auditors, investors) and smart contracts.
 
-![Sequence Diagram](.\src\assets\umlDiagramFlow.png)
+![UML Flow](../../static/img/umlDiagramFlow.png)
+
+<p style={{textAlign: 'center'}}>Source: Produced by the Authors (2025).</p>
 
 | Step | Initiator   | Contract         | Function                     | Description                                                                 |
 |------|-------------|------------------|------------------------------|-----------------------------------------------------------------------------|
@@ -59,7 +61,7 @@ This diagram represents the dynamic flow of information and calls between agents
 
 Illustrates all core layers involved in user interaction, contract execution, and gasless infrastructure.
 
-![Architecture Flow](./diagrams/architecture-flow-nero.png)
+![Blocks Diagram](../../static/img/diagramaBlocos.png)
 
 | Component               | Role Description                                                             |
 |------------------------|------------------------------------------------------------------------------|
@@ -79,7 +81,7 @@ Illustrates all core layers involved in user interaction, contract execution, an
 
 Illustrates static relationships and responsibilities of each smart contract module.
 
-![Class UML Diagram](./diagrams/uml-diagram-classes.png)
+![UML Class Diagram](../../static/img/umlDiagramContracts.png)
 
 | Contract        | Key Responsibilities                                                      |
 |-----------------|----------------------------------------------------------------------------|
@@ -120,13 +122,14 @@ OpenZeppelin’s `AccessControl` is used for robust permission management.
 
 ## Account Abstraction & Paymaster Workflow
 
-```mermaid
+```
 flowchart TD
     A[User Initiates Action] --> B[StackUp SDK Creates UserOp]
     B --> C[Paymaster Signs and Forwards]
     C --> D[EntryPoint Validates and Relays]
     D --> E[Smart Contract Executes Transaction]
 ```
+
 
 | Component       | Purpose                                                   |
 |------------------|------------------------------------------------------------|
@@ -144,51 +147,9 @@ flowchart TD
   - 95% of value is transferred to the producer
   - 5% is allocated to the AgriFinance fund
 - Fund balance is used to refund investors in case of partial or total crop failure
-
 ---
 
-## Deployment Steps
-
-1. Deploy contracts in the following order:
-   - `TCO2Token`
-   - `AgriFinance`
-   - `NFTCombo`
-   - `HarvestManager` (passing the three above as constructor parameters)
-
-2. Assign necessary roles via function calls:
-```solidity
-nftCombo.grantRole(MINTER_ROLE, address(harvestManager));
-tco2Token.grantRole(MINTER_ROLE, address(harvestManager));
-harvestManager.grantRole(PRODUCER_ROLE, producerAddress);
-harvestManager.grantRole(AUDITOR_ROLE, auditorAddress);
-```
-
----
-
-## File & Directory Structure
-
-```
-/contracts
-  HarvestManager.sol
-  TCO2Token.sol
-  NFTCombo.sol
-  AgriFinance.sol
-
-/diagrams
-  sequence-diagram.png
-  architecture-flow-nero.png
-  uml-diagram-classes.png
-
-/frontend
-  /src
-    App.tsx
-    useWallet.ts
-    paymaster.ts
-```
-
----
-
-## Final Remarks
+## Conclusion
 
 AgroChain is designed with modularity, sustainability, and Web3 accessibility in mind. Its infrastructure leverages native blockchain capabilities, gasless UX, and decentralized certification to build trust and efficiency in agricultural financing.
 
@@ -196,23 +157,3 @@ This architecture supports:
 - Modular and verifiable contract interactions
 - Role-based permissioning
 - Extensibility for DAO governance, DeFi integrations, or alternative carbon standards
-
----
-
-## Contact & Credits
-Project developed as part of **WaveHack – NERO Chain 2025**
-
-Contributors: `@your_team`, `@you`
-
-Official Links:
-- [NERO Chain](https://nerochain.io)
-- [NERO Docs](https://docs.nerochain.io)
-- [Twitter](https://twitter.com/nerochain_io)
-
-> Ready for deployment, integration, and public demonstration.
-
-
-```
-
----
- 
