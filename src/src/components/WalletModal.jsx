@@ -1,16 +1,8 @@
 import React, { useEffect } from 'react';
-<<<<<<< Updated upstream
-import metamask from '../assets/metamask.svg';
-import walletConnect from '../assets/walletconnect.svg';
-import coinbase from '../assets/coinbase.svg';
-
-
-=======
 // Importação direta dos ícones
 import metamaskIcon from '../assets/metamask.svg';
 import walletConnectIcon from '../assets/walletconnect.svg';
 import coinbaseIcon from '../assets/coinbase.svg';
->>>>>>> Stashed changes
 
 const WalletOption = ({ icon, name, onClick }) => {
   return (
@@ -54,15 +46,9 @@ const WalletModal = ({ isOpen, onClose }) => {
   };
 
   const walletOptions = [
-<<<<<<< Updated upstream
-    { icon: metamask, name: 'MetaMask' },
-    { icon: walletConnect, name: 'WalletConnect' },
-    { icon: coinbase, name: 'Coinbase Wallet' }
-=======
     { icon: metamaskIcon, name: 'MetaMask' },
     { icon: walletConnectIcon, name: 'WalletConnect' },
     { icon: coinbaseIcon, name: 'Coinbase Wallet' }
->>>>>>> Stashed changes
   ];
 
   return (

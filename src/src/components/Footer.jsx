@@ -1,12 +1,7 @@
 import React from 'react';
-<<<<<<< Updated upstream
-import logo from '../assets/logo_svg.svg';
-
-=======
 // Importação direta dos assets
 import logoImg from '../assets/logo_svg.svg';
 import neroLogoImg from '../assets/nero.svg';
->>>>>>> Stashed changes
 
 const LinkGroup = ({ title, links }) => {
   return (
@@ -30,49 +25,28 @@ const Footer = () => {
     {
       title: 'Platform',
       links: [
-<<<<<<< Updated upstream
-        { label: 'How It Works', url: '#how-it-works' },
-        { label: 'Products', url: '#products' },
-        { labe: 'Testimonials', url:'#testimonials'}
-=======
         { label: 'How It Works', url: 'https://miguelclaret.github.io/SeedSafe/' },
         { label: 'For Producers', url: '#producers' },
         { label: 'For Investors', url: '#investors' }
->>>>>>> Stashed changes
       ]
     },
     {
       title: 'Resources',
       links: [
         { label: 'Documentation', url: 'https://miguelclaret.github.io/SeedSafe/' },
-<<<<<<< Updated upstream
-=======
         { label: 'FAQ', url: 'https://x.com/SeedSafe1492878' }
->>>>>>> Stashed changes
       ]
     },
     {
       title: 'Company',
       links: [
-<<<<<<< Updated upstream
         { label: 'About Us', url: 'https://miguelclaret.github.io/SeedSafe/category/team' },
-=======
-        { label: 'About Us', url: '#about' },
-        { label: 'Our Team', url: '#team' },
-        { label: 'Partners', url: '#partners' },
-        { label: 'Contact', url: '#contact' },
-        { label: 'Press', url: '#press' }
->>>>>>> Stashed changes
       ]
     }
   ];
 
   const socialLinks = [
     { icon: 'fab fa-twitter', url: 'https://x.com/SeedSafe1492878' },
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
   ];
 
   return (
@@ -80,17 +54,12 @@ const Footer = () => {
       <div className="container mx-auto px-8">
         <div className="flex flex-wrap justify-between gap-8 mb-12">
           <div className="flex-basis-[250px]">
-<<<<<<< Updated upstream
-            <img src={logo} alt="SeedSafe" className="h-10 mb-4" />
-            <p className="text-sm opacity-80 max-w-xs">
-=======
           <div className="flex items-center gap-2">
         <img src={logoImg} alt="SeedSafe" className="h-10" />
         <span className="font-bold text-3xl">
           Seed<em className="text-green-400 not-italic">Safe</em>
         </span>
       </div>            <p className="text-sm opacity-80 max-w-xs">
->>>>>>> Stashed changes
               Tokenization of future harvests and carbon credits on NERO Chain
             </p>
           </div>
@@ -119,11 +88,7 @@ const Footer = () => {
                   <i className={link.icon}></i>
                 </a>
               ))}
-<<<<<<< Updated upstream
-            </div>            
-=======
             </div>
->>>>>>> Stashed changes
           </div>
         </div>
         
@@ -133,9 +98,6 @@ const Footer = () => {
           </p>
           <div className="flex items-center gap-2 text-xs opacity-70">
             <span>Powered by</span>
-<<<<<<< Updated upstream
-            <img src="../assets/nero-logo.svg" alt="NERO Chain" className="h-5" />
-=======
             <a 
               href="https://nerochain.io" 
               target="_blank" 
@@ -144,7 +106,6 @@ const Footer = () => {
             >
               <img src={neroLogoImg} alt="NERO Chain" className="h-5" />
             </a>
->>>>>>> Stashed changes
           </div>
         </div>
       </div>

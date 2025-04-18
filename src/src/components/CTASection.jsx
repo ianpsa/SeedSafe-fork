@@ -19,9 +19,6 @@ const CTASection = ({ openWalletModal }) => {
           </button>
         </div>
       </div>
-<<<<<<< Updated upstream
-      
-=======
       <div className="partners">
         <h4 className="text-gray-600 mb-6 font-medium text-xl">Powered by</h4>
         <div className="flex justify-center flex-wrap gap-8 items-center">
@@ -40,7 +37,6 @@ const CTASection = ({ openWalletModal }) => {
           </a>
         </div>
       </div>
->>>>>>> Stashed changes
     </section>
   );
 };
