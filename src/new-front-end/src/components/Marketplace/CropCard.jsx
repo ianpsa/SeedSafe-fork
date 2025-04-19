@@ -24,7 +24,7 @@ const RefreshCw = (props) => {
   );
 };
 
-const CropCard = ({ listing }) => {
+const CropCard = ({ listing, onInvestClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   
@@ -184,7 +184,10 @@ const CropCard = ({ listing }) => {
           </div>
         </div>
         
-        <button className="w-full bg-green-600 hover:bg-green-700 text-white py-1.5 px-3 rounded-md font-medium transition-all duration-300 flex items-center justify-center text-sm mt-auto relative overflow-hidden group">
+        <button 
+          onClick={() => onInvestClick(listing)}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-1.5 px-3 rounded-md font-medium transition-all duration-300 flex items-center justify-center text-sm mt-auto relative overflow-hidden group"
+        >
           <span className="relative z-10">Invest Now</span>
           <div className="absolute inset-0 bg-green-700 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out"></div>
         </button>
