@@ -7,6 +7,7 @@ import UserTypeSection from "./components/UserTypeSection";
 import Marketplace from "./components/Marketplace/Index";
 import AuditorDashboard from "./components/Auditor";
 import ChatbotFeature from "./components/ChatbotFeature"; // Import the ChatbotFeature component
+import FloatingChatbot from "./components/FloatingChatBot"; // Import the FloatingChatbot component
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState("home");
@@ -163,6 +164,8 @@ const App = () => {
       </main>
 
       <Footer />
+      
+      <FloatingChatbot />
     </div>
   );
 };

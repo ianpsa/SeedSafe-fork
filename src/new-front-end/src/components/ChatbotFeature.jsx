@@ -162,9 +162,7 @@ const ChatbotFeature = () => (
             Get answers about the process
           </li>
         </ul>
-        <button className="py-3 px-6 rounded-full font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-all">
-          Chat with AgroBot
-        </button>
+        
       </div>
       <div className="flex-1 min-w-[350px]">
         <ChatWindow />
