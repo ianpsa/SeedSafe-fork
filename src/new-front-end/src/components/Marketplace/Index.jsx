@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, ChevronDown, ChevronUp, Leaf, Info } from 'lucide-react';
 import FiltersPanel from './FiltersPanel';
 import CropCard from './CropCard';
+import PurchaseModal from './PurchaseModal';
 import { mockListings } from './mockData';
 
 // Define the RefreshCw component once, at the top
@@ -34,6 +35,8 @@ const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState('default');
+  const [selectedListing, setSelectedListing] = useState(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [filters, setFilters] = useState({
     minRating: 0,
     sustainablePractices: [],
@@ -116,6 +119,19 @@ const Marketplace = () => {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
+  };
+
+  // Function to handle investment button click
+  const handleInvestClick = (listing) => {
+    setSelectedListing(listing);
+    setShowPurchaseModal(true);
+  };
+
+  // Function to handle purchase confirmation
+  const handlePurchaseConfirm = () => {
+    // This would typically involve blockchain transactions
+    console.log('Purchase confirmed for:', selectedListing);
+    // Further processing would happen here
   };
 
   // Function to add staggered animation delay
@@ -211,7 +227,10 @@ const Marketplace = () => {
                   animationFillMode: 'forwards' 
                 }}
               >
-                <CropCard listing={listing} />
+                <CropCard 
+                  listing={listing} 
+                  onInvestClick={handleInvestClick}
+                />
               </div>
             ))}
           </div>
@@ -222,6 +241,16 @@ const Marketplace = () => {
             </div>
           )}
         </>
+      )}
+      
+      {/* Purchase Modal */}
+      {selectedListing && (
+        <PurchaseModal 
+          isOpen={showPurchaseModal}
+          onClose={() => setShowPurchaseModal(false)}
+          listing={selectedListing}
+          onConfirm={handlePurchaseConfirm}
+        />
       )}
       
       <style jsx global>{`
