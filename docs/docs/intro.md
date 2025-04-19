@@ -6,25 +6,53 @@ slug: /
 
 # SeedSafe — Crop Financing & Carbon Credit Platform  
 
-**Empowering farmers to thrive in the green economy through seamless Web3 experiences**
+**Empowering farmers to thrive in the green economy through seamless Web3 experiences on NERO Chain**
 
 ## Pitch Video  
 Insert your video pitch link here (YouTube, Loom, etc.)
 
 ## Executive Summary
 
-**SeedSafe** is a decentralized application (dApp) built on the **NERO Chain**, focused on facilitating **crop financing** and **carbon credit monetization** for small and medium-sized farmers. The project connects **social impact, climate innovation, and regenerative finance** through blockchain technology, offering a seamless user experience via **Account Abstraction (AA)** and **Paymaster integration**.
+SeedSafe is a platform built on NERO Chain that **connects investors to farmers** through dual tokenization: harvest tokens (ERC-1155) + carbon tokens (TCO2), forming ComboNFTs (ERC-721) with complete traceability, all with **gasless transactions** via the Paymaster system.
 
-### Target Users:
-- Smallholder farmers and agricultural cooperatives  
-- Impact investors and green finance institutions  
-- Environmental auditors and certification agents  
+### 🌱 SeedSafe Vision
+  <div style={{ margin: 15, textAlign: 'center' }}>
+      <img src={require("../static/img/ExecutiveSummary.png").default} style={{ borderRadius: '10%'}} alt="Executive Summary" />
+      <br />
+  </div>
 
-### The Problem:
-Farmers adopting sustainable agricultural practices face difficulties accessing traditional financing and navigating the complex carbon credit ecosystem.
+### 🔄 SeedSafe Tokenization Flow
+  <div style={{ margin: 15, textAlign: 'center' }}>
+      <img src={require("../static/img/TokenizationFlow.png").default} style={{ borderRadius: '10%'}} alt="SeedSafe Tokenization Flow" />
+      <br />
+  </div>
 
-### The Solution:
-SeedSafe provides an accessible platform for tokenizing crops and environmental services, enabling farmers to access financing and monetize sustainability efforts. Smart contracts ensure transparency and traceability throughout the lifecycle of each crop or environmental asset.
+## Target Users:
+- 👨‍🌾 Smallholder farmers and agricultural cooperatives  
+- 💰 Impact investors and green finance institutions  
+- 🔍 Environmental auditors and certification agents  
+- 🌐 Web3 newcomers benefiting from gasless transactions
+
+## The Problem:
+Farmers adopting sustainable agricultural practices face significant barriers accessing:
+- Traditional financing with fair rates
+- Complex and fragmented carbon credit markets
+- Blockchain technology due to technical complexity and gas costs
+
+## The Solution:
+SeedSafe provides an accessible platform for tokenizing crops and environmental services, enabling farmers to access financing and monetize sustainability efforts. Smart contracts ensure transparency and traceability throughout the lifecycle of each crop or environmental asset through:
+
+- **Smart Accounts via NERO AA:** Social login without needing MetaMask
+- **Gasless Experience:** All transactions sponsored by the Paymaster system
+- **Dual Tokenization:** Transparent digital representation of crops and carbon capture
+- **AgroBot Assistant:** AI that guides non-technical users through NERO's Web3 ecosystem
+
+## NERO Chain Integration Highlights
+
+- **Account Abstraction Implementation:** Creation of smart accounts via Web3Auth integrated with NERO EntryPoint
+- **Gasless Transaction Flow:** Paymaster system configured to sponsor all user actions
+- **Custom Fee Logic:** Customized fee structure benefiting all stakeholders
+- **Blockspace 2.0 Optimization:** Technical architecture leveraging NERO Chain flexibility
 
 ## Product Overview
 
@@ -46,6 +74,16 @@ SeedSafe provides an accessible platform for tokenizing crops and environmental 
 - **Stakeholder Dashboards** for farmers, auditors, and investors  
 - **Offline Data Capture with Local Sync**  
 - **Progressive UX Disclosure** to minimize Web3 learning curves  
+
+## Core Innovation: Tokenization Model
+
+Our dual tokenization approach connects sustainable farmers to investors through:
+
+1. **Harvest Token (ERC-1155):** Represents fractional ownership of agricultural production
+2. **Carbon Token (TCO2/ERC-20):** Quantifies and monetizes carbon capture
+3. **Combo NFT (ERC-721):** Combines both tokens with verifiable metadata
+
+This model enables financial returns while incentivizing sustainable practices, creating a virtuous cycle of investment and positive environmental impact.
 
 ## Innovation & Impact
 
