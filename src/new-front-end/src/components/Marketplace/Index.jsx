@@ -209,15 +209,14 @@ const Marketplace = () => {
         </div>
       </div>
       
-      {/* Loading Indicator */}
       {isLoading ? (
         <div className="flex justify-center items-center p-12">
           <RefreshCw className="h-12 w-12 text-green-500 animate-spin" />
         </div>
       ) : (
         <>
-          {/* Listings Grid - Fixed to properly display 4 cards on desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Listings Grid - Using the grid-cards class from your CSS */}
+          <div className="grid-cards">
             {filteredListings.map((listing, index) => (
               <div 
                 key={listing.id}
