@@ -7,79 +7,85 @@ custom_edit_url: null
 
 ## Introduction
 
-&emsp;This section presents the proposal for using NERO Chain’s Paymaster system within the Seed Safe platform. Based on the ERC-4337 (Account Abstraction) infrastructure, NERO’s Paymaster allows users to perform transactions without paying gas fees — a key factor for the adoption of a fluid, accessible, and inclusive Web3 experience.
+&emsp;This section explains how the **NERO Chain Paymaster** system will be used within the **Seed Safe** platform. Based on the ERC-4337 (Account Abstraction) infrastructure, the Paymaster allows users to perform transactions **without paying gas fees**, enabling a **smooth, accessible, and inclusive** Web3 experience.
 
 ## What is the Paymaster and How It Will Be Used
 
-&emsp;The Paymaster is a component of the ERC-4337 standard responsible for covering the gas costs of `UserOperations` (abstract operations) sent by users’ Smart Accounts. Seed Safe will use the **Paymaster provided by NERO Chain**, with no need to develop a custom contract.
+&emsp;The Paymaster is a component of ERC-4337 responsible for **covering the gas costs** of UserOperations. Seed Safe will use the **pre-built Paymaster provided by NERO Chain**, **eliminating the need for a custom contract**.
 
-This model will enable:
+This setup enables the platform to offer:
+- **100% gasless** transactions for farmers and investors  
+- User onboarding **without requiring token balances**  
+- Direct integration with NERO’s infrastructure, with no technical friction
 
-- 100% gasless transactions for farmers and investors  
-- Simplified onboarding for users with no token balance  
-- Seamless integration with NERO’s AA infrastructure  
+## Integrated Architecture with NERO Paymaster
 
-## Integrated Architecture (Using NERO’s Paymaster)
+| Component                    | Technical Role                                                                |
+|-----------------------------|-------------------------------------------------------------------------------|
+| **AA Wallet (Smart Account)** | Signs and constructs the user’s UserOperation                                |
+| **UserOp SDK**               | Uses the AA platform API to fetch Paymaster data and build UserOps            |
+| **NERO Paymaster**           | Sponsors the UserOperation sent to the EntryPoint                             |
+| **Bundlers (NERO)**          | Forwards UserOps for on-chain execution                                       |
+| **EntryPoint Contract**      | Executes the UserOperation after validation and gas sponsorship               |
+| **Seed Safe Smart Contract** | Executes the requested transaction logic                                      |
 
-| Component            | Technical Role                                                              |
-|----------------------|------------------------------------------------------------------------------|
-| NERO Paymaster        | Sponsors the platform’s UserOperations                                      |
-| EntryPoint (NERO)     | Executes operations validated and paid for via the Paymaster                |
-| Bundler (NERO)        | Forwards signed UserOperations to the network                               |
-| Smart Account (SDK)   | Represents the user as an abstract wallet                                   |
-| AgriFinance.sol       | Accumulates platform fees and may subsidize Paymaster usage in the future   |
-
-## How the Paymaster Will Be Indirectly Funded
-
-&emsp;Although Seed Safe won’t develop its own Paymaster, the platform will use a **financial sustainability model** through:
-
-- A fee applied to commercial transactions (e.g., crop token purchases)  
-- Fund collection and management via the `AgriFinance.sol` contract  
-- Future possibility of using part of this fund to subsidize or sponsor the Paymaster via partnerships or NERO extensions  
-
-&emsp;This model ensures the platform continues offering a gasless experience at scale without compromising financial sustainability.
-
-## Gasless Transaction Flow
+## Flow of a Gasless Transaction
 
 ```mermaid
 graph TD
-    A[User initiates action] --> B[Smart Account signs operation]
-    B --> C[UserOperation is created]
-    C --> D[Bundler sends to EntryPoint]
-    D --> E[EntryPoint checks with NERO Paymaster]
-    E --> F[Paymaster covers gas]
-    F --> G[Seed Safe contract executes function]
-    G --> H[User receives result without paying fees]
+    A[User clicks an action in the dApp] --> B[Smart Account initiates UserOp]
+    B --> C[SDK call to AA Platform API using dev API Key]
+    C --> D[UserOperation built using Paymaster data]
+    D --> E[UserOperation sent to Bundler]
+    E --> F[Bundler forwards to EntryPoint]
+    F --> G[EntryPoint queries NERO Paymaster]
+    G --> H[Paymaster covers the gas fee]
+    H --> I[Seed Safe contract executes the function]
+    I --> J[User receives the result (no fees paid)]
 ```
+
+> 💡 **Note:** Step `C` is essential and occurs on the front end through an **API call to the AA Platform**, using the developer’s **API Key** to retrieve Paymaster permissions and configuration.
+
+## How the Paymaster Will Be Funded
+
+&emsp;Although Seed Safe uses a pre-built Paymaster from NERO, there will be an **indirect sustainability model** based on:
+
+- Fees applied to commercial operations (e.g., crop token purchases)  
+- Revenue collected through the `AgriFinance.sol` contract  
+- Future use of this fund to **subsidize the Paymaster**, establish partnerships, or obtain sponsorships
+
+&emsp;This model ensures the system remains **scalable and financially viable**, even with high transaction volumes.
 
 ## Practical Example
 
-1. Ana, an investor, purchases 100kg of crop via Seed Safe.  
-2. The operation is packaged as a `UserOperation` by her Smart Account.  
-3. The Bundler sends it to the NERO network.  
-4. EntryPoint queries NERO’s native Paymaster.  
-5. The Paymaster covers the transaction gas.  
-6. Ana receives the tokens and certificate without spending anything on fees.
+1. Ana decides to purchase 100 kg of crops  
+2. The action triggers a UserOperation via the SDK, with data from NERO's API  
+3. The operation is sent to the Bundler, which forwards it to the EntryPoint  
+4. The EntryPoint queries NERO’s Paymaster  
+5. The Paymaster approves and covers the gas cost  
+6. The `SeedSafe` contract executes the transaction  
+7. Ana receives the tokens and certificates **without paying any fees**
 
 ## Security
 
-&emsp;Since NERO’s Paymaster already includes built-in validations, Seed Safe won’t need to implement a custom authorization system. Security is ensured by:
+&emsp;Gasless flow security is ensured by:
 
-- Limits defined by the NERO SDK and infrastructure  
-- Use of well-known, public contracts on the network  
-- Integration only with functions that make sense for end users  
+- Internal validations by the NERO Paymaster  
+- Permissions configured via the AA Platform (API Key)  
+- Use of public, auditable smart contracts  
+- Access limited only to specific Seed Safe functions  
 
 ## Integration Steps
 
-1. Integrate an AA-compatible SDK (e.g., StackUp, Alchemy) in the front-end  
-2. Set up automatic Smart Account creation upon accessing Seed Safe  
-3. Connect the front-end to NERO’s Paymaster through SDK configuration  
-4. Test gasless operations (e.g., `buyToken`, `mintCombo`) via UserOperation  
-5. Monitor Paymaster performance and consumption over time  
+1. Integrate a compatible AA SDK (e.g., StackUp, Alchemy)  
+2. Automatically create Smart Accounts when users access the platform  
+3. Configure Paymaster usage via API Key within the SDK  
+4. Test functions such as `buyToken`, `mintCombo` via UserOperation  
+5. Monitor Paymaster consumption and performance  
 
 ## Conclusion
 
-&emsp;Seed Safe will leverage NERO’s Paymaster system to allow its users to interact with the platform without technical or financial barriers. By adopting a reliable and secure existing infrastructure, the platform reduces technical complexity and accelerates implementation time, maintaining focus on a seamless experience and scalable solution.
+&emsp;Using the **NERO Chain Paymaster** allows Seed Safe to scale its Web3 solution without requiring users to purchase tokens for gas. Through **Account Abstraction**, efficient architecture, and sustainability via internal contracts, the platform delivers a **modern, inclusive, and user-centered** experience.
 
 ## Bibliography
 - SINGH, Aniket Kumar et al. Account abstraction via singleton entrypoint contract and verifying paymaster. In: 2023 2nd International Conference on Edge Computing and Applications (ICECAA). IEEE, 2023. p. 1598-1605.
