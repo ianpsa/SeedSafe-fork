@@ -3,8 +3,8 @@ import axios from 'axios';
 // === CONFIGURAÇÕES ===
 const BUNDLER_RPC = 'https://bundler.service.nerochain.io';
 const ENTRY_POINT = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';  // Substituir com o EntryPoint correto da NERO
-const PAYMASTER_ADDRESS = '0x5a6680dFd4a77FEea0A7be291147768EaA2414ad';
-const SENDER_ADDRESS = '0xab8D362c3Af4Ff7bCfB018bE9d61bB0DD7DF4E6F';
+const PAYMASTER_ADDRESS = process.env.PAYMASTER_ADDRESS;
+const SENDER_ADDRESS = process.env.SENDER_ADDRESS;
 
 const userOp = {
   sender: SENDER_ADDRESS,
