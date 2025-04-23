@@ -8,8 +8,11 @@ slug: /
 
 **Empowering farmers to thrive in the green economy through seamless Web3 experiences on NERO Chain**
 
-## Pitch Video  
-Insert your video pitch link here (YouTube, Loom, etc.)
+<div style={{ display: "flex", justifyContent: "center", marginTop: "2rem", marginBottom: "2rem" }}>
+   <iframe width="700" height="340" src="https://www.youtube.com/embed/ctsbB1tTNH4?si=NHQH8F15Z6QZjyyx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+Finance the harvest. Offset emissions. Regenerate the future.
 
 ## Executive Summary
 
