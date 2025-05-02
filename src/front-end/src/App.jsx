@@ -6,6 +6,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 // Importação direta dos assets
 import bgPattern from "./assets/bg-pattern.svg";
@@ -72,6 +73,18 @@ const addGlobalStyles = () => {
     document.head.appendChild(style);
   }
 };
+
+// Componente que remove barras à direita das URLs
+function RemoveTrailingSlash() {
+  const location = useLocation();
+  
+  // Se a URL terminar com uma barra, redirecione para a versão sem a barra
+  if (location.pathname.length > 1 && location.pathname.endsWith('/')) {
+    return <Navigate to={location.pathname.slice(0, -1) + location.search} replace />;
+  }
+  
+  return null;
+}
 
 function App() {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -171,6 +184,9 @@ function App() {
   return (
     <Router>
       <div className="font-poppins text-slate-800 overflow-x-hidden max-w-screen">
+        {/* Componente que remove barras à direita das URLs */}
+        <RemoveTrailingSlash />
+        
         <header
           className={`${
             isMobile
@@ -213,6 +229,8 @@ function App() {
                 </>
               }
             />
+            
+            {/* Rota para o Marketplace */}
             <Route
               path="/marketplace"
               element={
@@ -227,7 +245,14 @@ function App() {
                   <Marketplace />
                 </div>
               }
-            />{" "}
+            />
+            
+            {/* Rota sem barra que redireciona para a rota correta */}
+            <Route
+              path="marketplace"
+              element={<Navigate to="/marketplace" replace />}
+            />
+            
             <Route
               path="/register"
               element={
