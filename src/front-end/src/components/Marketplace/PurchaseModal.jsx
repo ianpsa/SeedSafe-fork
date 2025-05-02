@@ -7,7 +7,7 @@ import { X, Loader2, CheckCircle, AlertCircle, Info } from "lucide-react";
 // Helper to format NERO price from Wei
 const formatNeroPrice = (priceInWei) => {
   if (!priceInWei || priceInWei.isZero()) return "0.00";
-  return ethers.utils.formatUnits(priceInWei, 18); // Assuming 18 decimals
+  return ethers.utils.formatUnits(priceInWei, 18); // Assuming 18 decimals for NERO token
 };
 
 const PurchaseModal = ({ 
@@ -16,7 +16,8 @@ const PurchaseModal = ({
   listing, 
   onConfirm, 
   walletInfo, 
-  purchaseStatus // { state: 'idle' | 'pending' | 'success' | 'error', message: string }
+  purchaseStatus, // { state: 'idle' | 'pending' | 'success' | 'error', message: string }
+  chainName = "NERO Chain" // Default to NERO Chain
 }) => {
   const [quantity, setQuantity] = useState("");
   const [totalCostWei, setTotalCostWei] = useState(ethers.BigNumber.from(0));
@@ -67,7 +68,7 @@ const PurchaseModal = ({
       <div className="bg-slate-800 border border-slate-700 rounded-lg w-full max-w-md shadow-xl text-slate-50 overflow-hidden">
         {/* Header */}
         <div className="border-b border-slate-700 p-4 flex justify-between items-center bg-slate-700/50">
-          <h2 className="text-lg font-semibold">Buy Crop Token (#{listing.id})</h2>
+          <h2 className="text-lg font-semibold">Buy Crop Token on {chainName} (#{listing.id})</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors" disabled={purchaseStatus.state === 'pending'}>
             <X size={20} />
           </button>
@@ -75,6 +76,12 @@ const PurchaseModal = ({
 
         {/* Body */}
         <div className="p-5 space-y-4">
+          {/* NERO Chain Info */}
+          <div className="bg-blue-900/30 border border-blue-700 p-2 rounded text-xs text-blue-300 flex items-start gap-2">
+            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <span>Transactions on {chainName} require NERO tokens. Prices shown are in NERO tokens.</span>
+          </div>
+          
           {/* Listing Details */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             <span>Crop:</span><span className="font-medium text-right">{listing.cropType}</span>
@@ -131,7 +138,7 @@ const PurchaseModal = ({
           {!isInvestorConnected && (
              <div className="mt-4 p-3 rounded-md border text-sm flex items-center bg-yellow-900/30 border-yellow-700 text-yellow-300">
                <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-               Please connect your wallet as an Investor to purchase.
+               Please connect your wallet as an Investor to purchase on {chainName}.
              </div>
           )}
         </div>
@@ -165,4 +172,3 @@ const PurchaseModal = ({
 };
 
 export default PurchaseModal;
-

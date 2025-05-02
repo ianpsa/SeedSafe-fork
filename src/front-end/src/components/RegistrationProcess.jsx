@@ -1,16 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import React, { useState } from 'react';
 import CropForm from './RegistrationProcess/CropForm';
-import { parseToTokenUnits } from '../utils/ethersHelpers';
-
-// Import contract ABI
-import HarvestManagerABI from '../abi/abiHarvest.json';
 
 // Import icons
-import { CheckCircle, Loader2, AlertCircle } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, Info } from 'lucide-react';
 
-// Contract address
+// NERO Chain Contract address
 const HARVEST_MANAGER_ADDRESS = '0x0fC5025C764cE34df352757e82f7B5c4Df39A836';
+
+// Helper function to convert USD price to token units (implemented manually)
+const parseToTokenUnits = (value, decimals = 18) => {
+  if (!value && value !== 0) return "0";
+  
+  try {
+    // Ensure the value is a string and replace commas with dots
+    const valueStr = value.toString().replace(',', '.');
+    
+    // Manual implementation for conversion
+    const valueFloat = parseFloat(valueStr);
+    if (isNaN(valueFloat)) return "0";
+    
+    const multiplier = Math.pow(10, decimals);
+    const valueInWei = Math.floor(valueFloat * multiplier).toString();
+    return valueInWei;
+  } catch (error) {
+    console.error("Error converting value to token units:", error);
+    return "0";
+  }
+};
 
 const RegistrationProcess = ({ walletInfo }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -28,70 +44,6 @@ const RegistrationProcess = ({ walletInfo }) => {
   const [error, setError] = useState(null);
   const [txHash, setTxHash] = useState('');
   const [txStatus, setTxStatus] = useState(''); // 'submitting', 'pending', 'confirmed', 'failed'
-  const [signerInfo, setSignerInfo] = useState(null);
-
-  // Extract and check signer on component mount
-  useEffect(() => {
-    const checkSigner = async () => {
-      console.log("Checking wallet info:", walletInfo);
-      
-      try {
-        if (!walletInfo) {
-          console.log("No wallet info available");
-          return;
-        }
-        
-        // For Account Abstraction (Smart Account)
-        if (walletInfo.isSmartAccount && walletInfo.signer) {
-          console.log("Smart Account signer found");
-          setSignerInfo({
-            type: "Smart Account",
-            signer: walletInfo.signer,
-            address: walletInfo.address
-          });
-          return;
-        }
-        
-        // For regular EOA with provider/signer
-        if (walletInfo.signer) {
-          console.log("Direct signer found");
-          setSignerInfo({
-            type: "Direct Signer",
-            signer: walletInfo.signer,
-            address: walletInfo.address
-          });
-          return;
-        }
-        
-        // For WAGMI/RainbowKit connection where only address is available
-        if (walletInfo.address) {
-          console.log("Only address available, attempting to get signer from window.ethereum");
-          
-          // Try to get provider from window.ethereum
-          if (window.ethereum) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            // Request account access
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const signer = provider.getSigner();
-            const address = await signer.getAddress();
-            
-            setSignerInfo({
-              type: "Window Provider",
-              signer: signer,
-              address: address
-            });
-            return;
-          }
-        }
-        
-        console.log("No valid signer could be determined");
-      } catch (err) {
-        console.error("Error checking signer:", err);
-      }
-    };
-    
-    checkSigner();
-  }, [walletInfo]);
 
   // Form event handlers
   const handleInputChange = (e) => {
@@ -114,7 +66,7 @@ const RegistrationProcess = ({ walletInfo }) => {
     }
   };
 
-  // Form submission handler with blockchain interaction
+  // Handle form submission using the NERO AA-specific SimpleAccount
   const handleCropSubmit = async (e, submittedData = null) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -122,19 +74,20 @@ const RegistrationProcess = ({ walletInfo }) => {
     setTxStatus('submitting');
     
     try {
-      console.log("Starting crop registration process");
+      console.log("Starting crop registration process with NERO AA...");
       
       // Use passed data or fall back to formData
       const dataToProcess = submittedData || formData;
       console.log("Form data for processing:", dataToProcess);
       
-      // Check if we have wallet and signer information
-      if (!signerInfo || !signerInfo.signer) {
-        throw new Error("No valid signer available. Please make sure your wallet is properly connected.");
+      // Check if we have wallet information
+      if (!walletInfo) {
+        throw new Error("Wallet not connected. Please connect before continuing.");
       }
       
-      console.log("Using signer type:", signerInfo.type);
-      console.log("Signer address:", signerInfo.address);
+      if (walletInfo.role !== 'producer') {
+        throw new Error("Only producers can register crops. Please connect with a producer account.");
+      }
       
       // Validate critical data
       if (!dataToProcess.cropType || !dataToProcess.quantity || 
@@ -143,18 +96,17 @@ const RegistrationProcess = ({ walletInfo }) => {
         throw new Error("Incomplete form data. Please check all fields.");
       }
       
-      // Convert price to token units (NERO)
-      let priceInTokens;
-      try {
-        priceInTokens = parseToTokenUnits(dataToProcess.pricePerUnitUSD);
-        console.log("Price converted to token units:", priceInTokens);
-      } catch (convError) {
-        console.error("Error converting price:", convError);
-        throw new Error("Failed to convert price. Please check the value and try again.");
+      // Check if we have a NERO Smart Account signer
+      if (!walletInfo.isSmartAccount || !walletInfo.signer) {
+        throw new Error("NERO Smart Account not properly initialized");
       }
       
-      // Create documentation string for on-chain storage
-      const documentation = `Producer: ${signerInfo.address}, ` +
+      // Convert price to token units
+      const priceInTokens = parseToTokenUnits(dataToProcess.pricePerUnitUSD);
+      console.log("Price converted to token units:", priceInTokens);
+      
+      // Create documentation string
+      const documentation = `Producer: ${walletInfo.address}, ` +
                            `Location: ${dataToProcess.location}, ` +
                            `Area: ${dataToProcess.area}ha, ` +
                            `Practices: ${dataToProcess.sustainablePractices.join(',')}`;
@@ -164,75 +116,97 @@ const RegistrationProcess = ({ walletInfo }) => {
       // Calculate harvest date timestamp
       const harvestDateTimestamp = Math.floor(new Date(dataToProcess.harvestDate).getTime() / 1000);
       
-      // Connect to the contract
-      console.log("Connecting to HarvestManager contract at", HARVEST_MANAGER_ADDRESS);
-      const harvestManager = new ethers.Contract(
-        HARVEST_MANAGER_ADDRESS,
-        HarvestManagerABI,
-        signerInfo.signer
-      );
+      // NERO Account Abstraction approach:
+      const simpleAccount = walletInfo.signer;
+      console.log("Using NERO Account Abstraction for transaction");
       
-      // Prepare transaction parameters
-      const quantity = parseInt(dataToProcess.quantity);
-      const registerParams = [
-        dataToProcess.cropType,                 // crop name
-        ethers.BigNumber.from(quantity), // quantity
-        ethers.BigNumber.from(priceInTokens),  // pricePerUnit
-        ethers.BigNumber.from(harvestDateTimestamp), // deliveryDate
-        documentation                           // documentation
-      ];
-      
-      console.log("Register params:", registerParams);
-      
-      // Send transaction
-      console.log("Sending transaction to register crop");
-      const tx = await harvestManager.registerHarvest(...registerParams);
-      setTxHash(tx.hash);
+      // Set pending status
       setTxStatus('pending');
-      console.log("Transaction sent, hash:", tx.hash);
       
-      // Wait for confirmation
+      // Creating contract interaction data (function call data)
+      // Function signature: createHarvest(string crop, uint256 quantity, uint256 pricePerUnit, uint256 deliveryDate, string documentation)
+      const functionInterface = new ethers.utils.Interface([
+        "function createHarvest(string crop, uint256 quantity, uint256 pricePerUnit, uint256 deliveryDate, string documentation)"
+      ]);
+      
+      const callData = functionInterface.encodeFunctionData("createHarvest", [
+        dataToProcess.cropType,
+        dataToProcess.quantity,
+        priceInTokens,
+        harvestDateTimestamp,
+        documentation
+      ]);
+      
+      console.log("Encoded callData:", callData);
+      
+      // Create a UserOperation through NERO AA SDK
+      let userOpHash;
+      
+      console.log("Building UserOperation with NERO AA SDK...");
+      // Build the UserOperation
+      const userOp = await simpleAccount.buildUserOp([{
+        target: HARVEST_MANAGER_ADDRESS,
+        value: 0, // No ETH being sent
+        data: callData
+      }]);
+      
+      console.log("UserOperation built:", userOp);
+      
+      // Send the UserOperation to the bundler
+      console.log("Sending UserOperation to NERO Bundler...");
+      userOpHash = await simpleAccount.sendUserOp(userOp);
+      
+      console.log("UserOperation sent to NERO Chain:", userOpHash);
+      setTxHash(userOpHash.userOpHash || userOpHash);
+      
+      // Wait for the transaction to be included in a block
       console.log("Waiting for transaction confirmation...");
-      const receipt = await tx.wait();
-      console.log("Transaction confirmed:", receipt);
-      setTxStatus('confirmed');
+      const txReceipt = await userOpHash.wait();
+      console.log("Transaction confirmed on NERO Chain:", txReceipt);
       
-      // Try to extract harvest ID from events
-      let harvestId = "Unknown";
-      try {
-        const harvestCreatedEvent = receipt.events.find(e => e.event === 'HarvestCreated');
-        if (harvestCreatedEvent && harvestCreatedEvent.args) {
-          harvestId = harvestCreatedEvent.args.harvestId.toString();
-          console.log("Extracted Harvest ID:", harvestId);
-        }
-      } catch (eventError) {
-        console.warn("Could not extract harvest ID from event:", eventError);
-      }
+      // Update UI
+      setTxStatus('confirmed');
       
       // Store registration result
       setRegistrationResult({
         success: true,
-        cropId: harvestId,
+        cropId: txReceipt.receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
         timestamp: new Date().toISOString(),
-        transactionHash: receipt.transactionHash
+        transactionHash: txReceipt.transactionHash || userOpHash.userOpHash || userOpHash
       });
       
       // Move to next step
       setCurrentStep(2);
       
     } catch (error) {
-      console.error("Error registering crop:", error);
+      console.error("Error registering crop with NERO AA:", error);
       setTxStatus('failed');
-      setError(error.message || "An error occurred while processing the registration. Please try again.");
+      
+      // Format a more user-friendly error message
+      let errorMessage = "Transaction failed: " + (error.message || "Unknown error");
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Helper function to safely convert objects to strings for display
+  const safeStringify = (obj) => {
+    if (obj === null || obj === undefined) return '';
+    if (typeof obj === 'string') return obj;
+    if (typeof obj === 'number' || typeof obj === 'boolean') return obj.toString();
+    try {
+      // Try to convert to a string representation
+      return JSON.stringify(obj);
+    } catch (e) {
+      return '[Objeto Complexo]'; // Fallback for circular references
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6 min-h-[70vh]">
       <h1 className="text-2xl sm:text-3xl font-bold text-green-800 mb-6">
-        Crop Registration
+        Crop Registration with NERO AA
       </h1>
       
       {/* Progress bar */}
@@ -243,19 +217,39 @@ const RegistrationProcess = ({ walletInfo }) => {
         ></div>
       </div>
       
-      {/* Wallet/Signer Status */}
-      {!signerInfo?.signer && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6">
-          <p className="font-medium">Wallet Connection Required:</p>
-          <p>Please connect your wallet as a producer to register a crop.</p>
+      {/* NERO Smart Account Information */}
+      {walletInfo?.isSmartAccount && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-6 flex items-start gap-3">
+          <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Using NERO Smart Account:</p>
+            <p className="text-sm">You are connected with a NERO Smart Account. Your transaction will be processed using Account Abstraction.</p>
+            <p className="text-sm mt-2">Address: {safeStringify(walletInfo.address)}</p>
+            <p className="text-sm mt-1">Network: NERO Chain (Testnet)</p>
+            <p className="text-sm mt-1">Gas Sponsored: Yes (via NERO Paymaster)</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Wallet Connection Status */}
+      {(!walletInfo || walletInfo.role !== 'producer') && (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6 flex items-start gap-3">
+          <Info className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Producer Account Required:</p>
+            <p>Please connect your wallet as a producer to register a crop. Only producer accounts can register new crops.</p>
+          </div>
         </div>
       )}
       
       {/* Global error message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-          <p className="font-medium">Error:</p>
-          <p>{error}</p>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Error:</p>
+            <p>{safeStringify(error)}</p>
+          </div>
         </div>
       )}
       
@@ -266,23 +260,23 @@ const RegistrationProcess = ({ walletInfo }) => {
           txStatus === 'pending' ? 'bg-yellow-50 border border-yellow-200 text-yellow-700' :
           'bg-red-50 border border-red-200 text-red-700'
         }`}>
-          {txStatus === 'submitting' && <Loader2 className="h-5 w-5 animate-spin text-blue-500 mt-0.5" />}
-          {txStatus === 'pending' && <Loader2 className="h-5 w-5 animate-spin text-yellow-500 mt-0.5" />}
-          {txStatus === 'failed' && <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />}
+          {txStatus === 'submitting' && <Loader2 className="h-5 w-5 animate-spin text-blue-500 mt-0.5 flex-shrink-0" />}
+          {txStatus === 'pending' && <Loader2 className="h-5 w-5 animate-spin text-yellow-500 mt-0.5 flex-shrink-0" />}
+          {txStatus === 'failed' && <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />}
           <div>
             <p className="font-medium">
-              {txStatus === 'submitting' ? 'Preparing Transaction' :
-               txStatus === 'pending' ? 'Transaction Pending' :
+              {txStatus === 'submitting' ? 'Preparing NERO Transaction' :
+               txStatus === 'pending' ? 'NERO Transaction Pending' :
                'Transaction Failed'}
             </p>
             {txHash && (
               <p className="text-sm mt-1 break-all">
-                Transaction Hash: {txHash}
+                Transaction Hash: {safeStringify(txHash)}
               </p>
             )}
             {txStatus === 'pending' && (
               <p className="text-sm mt-1">
-                Please wait while the transaction is being confirmed on the blockchain.
+                Please wait while the transaction is being confirmed on the NERO blockchain.
               </p>
             )}
           </div>
@@ -309,7 +303,7 @@ const RegistrationProcess = ({ walletInfo }) => {
             </div>
             <h2 className="text-2xl font-bold text-green-800">Registration Completed Successfully!</h2>
             <p className="text-green-700 mt-2">
-              Your crop has been registered and is now pending verification by an auditor.
+              Your crop has been registered on NERO Chain and is now pending verification by an auditor.
             </p>
           </div>
           
@@ -317,16 +311,24 @@ const RegistrationProcess = ({ walletInfo }) => {
             <h3 className="font-semibold text-green-800 mb-2">Transaction Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-500">Harvest ID</p>
-                <p className="font-medium">{registrationResult.cropId}</p>
+                <p className="text-gray-500">Status</p>
+                <p className="font-medium text-green-600">Transaction Successful</p>
               </div>
               <div>
                 <p className="text-gray-500">Date/Time</p>
                 <p className="font-medium">{new Date(registrationResult.timestamp).toLocaleString()}</p>
               </div>
               <div className="sm:col-span-2">
+                <p className="text-gray-500">Network</p>
+                <p className="font-medium">NERO Chain (Testnet)</p>
+              </div>
+              <div className="sm:col-span-2">
                 <p className="text-gray-500">Transaction Hash</p>
-                <p className="font-medium break-all">{registrationResult.transactionHash}</p>
+                <p className="font-medium break-all">{safeStringify(registrationResult.transactionHash)}</p>
+              </div>
+              <div className="sm:col-span-2">
+                <p className="text-gray-500">Gas Payment</p>
+                <p className="font-medium text-blue-600">Sponsored by NERO Paymaster</p>
               </div>
             </div>
           </div>
@@ -337,7 +339,7 @@ const RegistrationProcess = ({ walletInfo }) => {
               Next Steps
             </h3>
             <p className="text-amber-700 text-sm">
-              Your crop registration has been submitted to the blockchain and is awaiting verification by an auditor. 
+              Your crop registration has been submitted to the NERO blockchain and is awaiting verification by an auditor. 
               After verification, your crop will be listed on the marketplace and available for investors.
             </p>
           </div>

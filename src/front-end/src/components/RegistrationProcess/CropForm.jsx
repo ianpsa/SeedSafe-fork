@@ -9,7 +9,8 @@ import {
   Recycle, 
   Wind,
   Info,
-  DollarSign // Added for price
+  DollarSign,
+  FileText 
 } from 'lucide-react';
 
 const SustainablePracticeCard = ({ id, title, description, icon: Icon, isSelected, onChange }) => {
@@ -117,17 +118,71 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
   // Handle form submission, including validation checks
   const onSubmit = (e) => {
     e.preventDefault();
-    if (!formData.harvestDate) setDateError('Harvest date is required');
-    if (!formData.area || parseFloat(formData.area) <= 0) setAreaError('Farm area must be a positive number');
-    // Use 'pricePerUnitUSD' for validation check now
-    if (!formData.pricePerUnitUSD || parseFloat(formData.pricePerUnitUSD) <= 0) setPriceError('Price must be a positive number');
-    if (!formData.quantity || parseInt(formData.quantity, 10) <= 0) setQuantityError('Quantity must be a positive whole number');
+    
+    // Log formData for diagnostic
+    console.log("Form submission. FormData:", formData);
+    
+    // Validation checks
+    let hasError = false;
+    
+    if (!formData.harvestDate) {
+      setDateError('Harvest date is required');
+      hasError = true;
+    }
+    
+    if (!formData.area || parseFloat(formData.area) <= 0) {
+      setAreaError('Farm area must be a positive number');
+      hasError = true;
+    }
+    
+    // Use 'pricePerUnitUSD' for validation check
+    if (!formData.pricePerUnitUSD || parseFloat(formData.pricePerUnitUSD) <= 0) {
+      setPriceError('Price must be a positive number');
+      hasError = true;
+    }
+    
+    if (!formData.quantity || parseInt(formData.quantity, 10) <= 0) {
+      setQuantityError('Quantity must be a positive whole number');
+      hasError = true;
+    }
+    
+    if (!formData.cropType) {
+      console.error("Missing cropType");
+      hasError = true;
+    }
+    
+    if (!formData.location) {
+      console.error("Missing location");
+      hasError = true;
+    }
 
-    if (dateError || areaError || priceError || quantityError || !formData.cropType || !formData.location) {
-      console.error("Validation errors:", { dateError, areaError, priceError, quantityError });
+    if (hasError) {
+      console.error("Validation errors:", { 
+        dateError, 
+        areaError, 
+        priceError, 
+        quantityError,
+        cropType: !formData.cropType,
+        location: !formData.location
+      });
       return; 
     }
-    handleStepOneSubmit(e);
+    
+    try {
+      // Log we're about to call handleStepOneSubmit
+      console.log("Calling handleStepOneSubmit with valid data");
+      
+      // Ensure the price is a string (to avoid issues with parseUnits)
+      const dataToSubmit = {
+        ...formData,
+        pricePerUnitUSD: formData.pricePerUnitUSD.toString()
+      };
+      
+      // Call the submission function with validated data
+      handleStepOneSubmit(e, dataToSubmit);
+    } catch (error) {
+      console.error("Error during form submission:", error);
+    }
   };
 
   // Define sustainable practices
@@ -154,7 +209,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
             <label className="block text-sm font-medium text-gray-700 mb-1">Crop Type</label>
             <select 
               name="cropType"
-              value={formData.cropType}
+              value={formData.cropType || ""}
               onChange={handleInputChange}
               className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
               required
@@ -174,7 +229,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
             <input 
               type="number"
               name="quantity"
-              value={formData.quantity}
+              value={formData.quantity || ""}
               onChange={validateQuantity}
               className={`w-full p-2 bg-white text-gray-800 border ${quantityError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500`}
               placeholder="e.g. 1000"
@@ -183,7 +238,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
              {quantityError && <p className="text-red-500 text-xs mt-1">{quantityError}</p>}
           </div>
 
-          {/* Price Per Unit (USD) - Changed Label and Name */}
+          {/* Price Per Unit (USD) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               <DollarSign className="h-4 w-4 inline mr-1 text-gray-500" />
@@ -191,8 +246,8 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
             </label>
             <input 
               type="number"
-              name="pricePerUnitUSD" // Changed name to reflect USD input
-              value={formData.pricePerUnitUSD} // Use new state variable
+              name="pricePerUnitUSD"
+              value={formData.pricePerUnitUSD || ""}
               onChange={validatePrice}
               className={`w-full p-2 bg-white text-gray-800 border ${priceError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500`}
               placeholder="e.g. 0.07"
@@ -212,7 +267,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
             <input 
               type="number"
               name="area"
-              value={formData.area}
+              value={formData.area || ""}
               onChange={validateArea}
               className={`w-full p-2 bg-white text-gray-800 border ${areaError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500`}
               placeholder="e.g. 5.5"
@@ -233,7 +288,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
             <input 
               type="date"
               name="harvestDate"
-              value={formData.harvestDate}
+              value={formData.harvestDate || ""}
               onChange={validateDate}
               className={`w-full p-2 bg-white text-gray-800 border ${dateError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500`}
               required
@@ -250,13 +305,29 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
             <input 
               type="text"
               name="location"
-              value={formData.location}
+              value={formData.location || ""}
               onChange={handleInputChange}
               className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="City, State"
               required
             />
           </div>
+        </div>
+          
+        {/* Additional Documentation Field */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            <FileText className="h-4 w-4 inline mr-1 text-green-600" />
+            Additional Documentation
+          </label>
+          <textarea
+            name="additionalDocumentation"
+            value={formData.additionalDocumentation || ""}
+            onChange={handleInputChange}
+            className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 min-h-[100px]"
+            placeholder="Add any additional information about your crop, certifications, or sustainable farming methods..."
+          />
+          <p className="text-xs text-gray-500 mt-1">This information will be stored on-chain to support your sustainability claims.</p>
         </div>
           
         {/* Sustainable Practices */}
@@ -312,4 +383,3 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
 };
 
 export default CropForm;
-

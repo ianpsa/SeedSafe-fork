@@ -9,8 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   Leaf,
-  Info,
-  RefreshCw as RefreshIcon,
+  Info
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import FiltersPanel from "./FiltersPanel";
@@ -20,6 +19,10 @@ import PurchaseModal from "./PurchaseModal";
 // Import ABI and contract address
 import HarvestManagerABI from '../../abi/abiHarvest.json';
 const harvestManagerAddress = '0x0fC5025C764cE34df352757e82f7B5c4Df39A836';
+
+// NERO Chain configuration
+const NERO_RPC_URL = "https://rpc-testnet.nerochain.io";
+const NERO_CHAIN_ID = 689;
 
 // Fixed conversion rate provided by user
 const NERO_USD_RATE = 0.000134;
@@ -84,20 +87,33 @@ const Marketplace = ({ walletInfo }) => {
   // Get the EOA signer using Wagmi's hook for connected wallet
   const { data: walletClient } = useWalletClient(); 
 
-  // Fetch data from blockchain
+  // Fetch data from NERO blockchain
   useEffect(() => {
     const fetchHarvests = async () => {
       if (!provider) {
-        setError("Blockchain provider not available. Please connect your wallet.");
+        setError("NERO Chain provider not available. Please connect your wallet.");
         setIsLoading(false);
         return;
       }
       setIsLoading(true);
       setError(null);
       try {
-        const contract = new ethers.Contract(harvestManagerAddress, HarvestManagerABI, provider);
+        // Create NERO-specific provider if needed
+        let neroProvider;
+        if (provider.network?.chainId !== NERO_CHAIN_ID) {
+          console.log("Creating custom NERO provider since current provider is not NERO Chain");
+          neroProvider = new ethers.providers.JsonRpcProvider(NERO_RPC_URL);
+        } else {
+          console.log("Using current provider for NERO Chain");
+          neroProvider = provider;
+        }
+        
+        const contract = new ethers.Contract(harvestManagerAddress, HarvestManagerABI, neroProvider);
         const currentId = await contract.currentHarvestId();
         const fetchedHarvests = [];
+        
+        console.log(`Found ${currentId.toNumber()} total harvests on NERO Chain`);
+        
         for (let i = 0; i < currentId.toNumber(); i++) {
           try {
             const harvestData = await contract.harvests(i);
@@ -105,13 +121,13 @@ const Marketplace = ({ walletInfo }) => {
               fetchedHarvests.push({ id: i, ...harvestData });
             }
           } catch (loopError) {
-            console.warn(`Failed to fetch harvest ID ${i}:`, loopError);
+            console.warn(`Failed to fetch harvest ID ${i} from NERO Chain:`, loopError);
           }
         }
         setListings(fetchedHarvests);
       } catch (err) {
-        console.error("Error fetching harvests:", err);
-        setError("Failed to load marketplace data. Please try again later.");
+        console.error("Error fetching harvests from NERO Chain:", err);
+        setError("Failed to load marketplace data from NERO Chain. Please try again later.");
         setListings([]);
       } finally {
         setIsLoading(false);
@@ -185,21 +201,28 @@ const Marketplace = ({ walletInfo }) => {
     setShowPurchaseModal(true);
   };
 
-  // Handle purchase confirmation - Actual Transaction Logic
+  // Handle purchase confirmation - Using NERO Chain for investors
   const handlePurchaseConfirm = async (purchaseAmount) => {
     // Check if investor is connected via EOA and listing is selected
     if (!walletClient || walletInfo?.role !== 'investor' || !selectedListing) {
-      setPurchaseStatus({ state: 'error', message: 'Please connect as an Investor.' });
+      setPurchaseStatus({ state: 'error', message: 'Please connect as an Investor to buy on NERO Chain.' });
       console.error("Investor not connected or listing not selected.");
       return;
     }
     
-    setPurchaseStatus({ state: 'pending', message: 'Preparing transaction...' });
-    console.log(`Attempting to purchase ${purchaseAmount} units of harvest ID ${selectedListing.id}`);
+    setPurchaseStatus({ state: 'pending', message: 'Preparing NERO Chain transaction...' });
+    console.log(`Attempting to purchase ${purchaseAmount} units of harvest ID ${selectedListing.id} on NERO Chain`);
 
     try {
       // Get the EOA signer from the wallet client
       const signer = walletClient;
+      
+      // Check if we're on the correct network (NERO Chain)
+      const network = await signer.getChainId();
+      if (network !== NERO_CHAIN_ID) {
+        setPurchaseStatus({ state: 'error', message: `Please switch to NERO Chain (Chain ID: ${NERO_CHAIN_ID})` });
+        return;
+      }
       
       // Create contract instance with the signer
       const contract = new ethers.Contract(harvestManagerAddress, HarvestManagerABI, signer);
@@ -209,7 +232,7 @@ const Marketplace = ({ walletInfo }) => {
       const amountToBuy = ethers.BigNumber.from(purchaseAmount);
       const totalCostInWei = selectedListing.pricePerUnit.mul(amountToBuy);
       
-      console.log(`Calculated Total Cost: ${ethers.utils.formatUnits(totalCostInWei, 18)} NERO`);
+      console.log(`Calculated Total Cost on NERO Chain: ${ethers.utils.formatUnits(totalCostInWei, 18)} NERO`);
 
       setPurchaseStatus({ state: 'pending', message: 'Please confirm the transaction in your wallet...' });
 
@@ -220,24 +243,24 @@ const Marketplace = ({ walletInfo }) => {
         // gasLimit: ethers.utils.hexlify(300000) 
       });
 
-      setPurchaseStatus({ state: 'pending', message: `Transaction submitted: ${tx.hash}. Waiting for confirmation...` });
-      console.log("Transaction submitted:", tx.hash);
+      setPurchaseStatus({ state: 'pending', message: `NERO Transaction submitted: ${tx.hash}. Waiting for confirmation...` });
+      console.log("NERO Transaction submitted:", tx.hash);
 
       // Wait for the transaction to be mined
       const receipt = await tx.wait();
-      console.log("Transaction confirmed:", receipt);
+      console.log("NERO Transaction confirmed:", receipt);
 
-      setPurchaseStatus({ state: 'success', message: `Purchase successful! Transaction Hash: ${receipt.transactionHash}` });
+      setPurchaseStatus({ state: 'success', message: `Purchase successful on NERO Chain! Transaction Hash: ${receipt.transactionHash}` });
       // Optionally: Refresh listings or update UI after successful purchase
       // fetchHarvests(); // Re-fetch data
       setTimeout(() => setShowPurchaseModal(false), 3000); // Close modal after delay
 
     } catch (err) {
-      console.error("Purchase failed:", err);
+      console.error("NERO Chain purchase failed:", err);
       // Try to extract a more user-friendly error message
-      let errorMessage = "Purchase failed. Check console for details.";
+      let errorMessage = "Purchase failed on NERO Chain. Check console for details.";
       if (err.reason) {
-        errorMessage = `Transaction failed: ${err.reason}`;
+        errorMessage = `NERO Transaction failed: ${err.reason}`;
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -256,11 +279,11 @@ const Marketplace = ({ walletInfo }) => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-slate-800 flex items-center">
           <Leaf className="mr-2 h-8 w-8 text-green-600" />
-          Crop Marketplace
+          NERO Chain Marketplace
         </h1>
         {walletInfo?.role === 'producer' && (
           <Link to="/register" className="bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-md flex items-center transition-colors">
-            <Leaf className="mr-2 h-5 w-5" /> Register Your Crop
+            <Leaf className="mr-2 h-5 w-5" /> Register Your Crop with NERO AA
           </Link>
         )}
       </div>
@@ -269,7 +292,7 @@ const Marketplace = ({ walletInfo }) => {
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300 hover:shadow-xl">
         <div className="flex items-start gap-2">
           <Info className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
-          <p className="text-gray-700 mb-6">Browse sustainable farming opportunities...</p>
+          <p className="text-gray-700 mb-6">Browse sustainable farming opportunities on NERO Chain. All transactions use the NERO token.</p>
         </div>
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-grow relative">
@@ -290,14 +313,28 @@ const Marketplace = ({ walletInfo }) => {
           {showFilters && <FiltersPanel filters={filters} setFilters={setFilters} />}
         </div>
         <div className="mb-4 text-gray-600 flex items-center">
-          {isLoading ? <><RefreshIcon className="mr-2 h-4 w-4 text-green-600 animate-spin" /> Loading listings...</> : `Showing ${filteredListings.length} results`}
+          {isLoading ? <><RefreshIcon className="mr-2 h-4 w-4 text-green-600 animate-spin" /> Loading NERO Chain listings...</> : `Showing ${filteredListings.length} results from NERO Chain`}
+        </div>
+      </div>
+
+      {/* NERO Chain Network Information */}
+      <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-6 flex items-start gap-3">
+        <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="font-medium">NERO Chain Platform</p>
+          <p className="text-sm">All listings are stored on NERO Chain (TestNet). Account Abstraction is available for producers.</p>
+          {walletInfo?.isSmartAccount ? (
+            <p className="text-sm mt-2">You are connected with a NERO Smart Account. Your transactions will be gasless.</p>
+          ) : (
+            <p className="text-sm mt-2">Investors need NERO tokens to purchase. Producers can use NERO AA for gasless transactions.</p>
+          )}
         </div>
       </div>
 
       {/* Error Loading Message */}
       {error && (
          <div className="text-center p-6 bg-red-50 border border-red-200 rounded-lg shadow mt-6">
-            <p className="text-red-700 font-medium">Error loading marketplace:</p>
+            <p className="text-red-700 font-medium">Error loading NERO Chain marketplace:</p>
             <p className="text-red-600 text-sm">{error}</p>
           </div>
       )}
@@ -315,7 +352,7 @@ const Marketplace = ({ walletInfo }) => {
             </div>
           ) : (
             <div className="text-center p-12 bg-white rounded-lg shadow mt-6">
-              <p className="text-gray-600">No listings match your criteria or no crops have been validated yet.</p>
+              <p className="text-gray-600">No listings match your criteria or no crops have been validated yet on NERO Chain.</p>
             </div>
           )}
         </>
@@ -330,6 +367,7 @@ const Marketplace = ({ walletInfo }) => {
           onConfirm={handlePurchaseConfirm}
           walletInfo={walletInfo} // Pass wallet info
           purchaseStatus={purchaseStatus} // Pass purchase status for feedback
+          chainName="NERO Chain"
         />
       )}
 
@@ -345,4 +383,3 @@ const Marketplace = ({ walletInfo }) => {
 };
 
 export default Marketplace;
-
