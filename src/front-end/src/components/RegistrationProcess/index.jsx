@@ -51,14 +51,13 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
     try {
       const signer = await getSigner();
   
-      // Ajustar campos
       const crop = formData.cropType;
       const quantity = parseInt(formData.quantity);
-      const price = 25; // fixo ou crie um campo no form
-      const deliveryDate = Math.floor(new Date(formData.harvestDate).getTime() / 1000); // timestamp
-      const doc = formData.location || "doc://placeholder"; // ou outro campo
+      const price = 25;
+      const deliveryDate = Math.floor(new Date(formData.harvestDate).getTime() / 1000);
+      const doc = formData.location || "doc://placeholder";
   
-      await registerHarvestUserOp(signer, {
+      const userOpHash = await registerHarvestUserOp(signer, {
         crop,
         quantity,
         price,
@@ -66,13 +65,15 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
         doc,
       });
   
-      // Após envio bem-sucedido:
+      console.log("✅ Safra registrada com UserOperation:", userOpHash);
       setShowLogin(true);
+  
     } catch (err) {
       console.error("Erro ao registrar safra:", err);
-      alert("Erro ao registrar safra. Veja o console.");
+      alert("Erro ao registrar safra:\n" + (err?.message || "sem mensagem"));
     }
   };
+  
   
   
   // Continue to verification after login
@@ -98,6 +99,21 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
       }, 2000);
     }
   };
+
+  useEffect(() => {
+    const testProvider = async () => {
+      try {
+        const { JsonRpcProvider } = await import("ethers");
+        const provider = new JsonRpcProvider("https://rpc-testnet.nerochain.io");
+        const network = await provider.getNetwork();
+        console.log("🔍 Resultado do getNetwork():", network);
+      } catch (err) {
+        console.error("❌ Erro ao testar a RPC da NERO:", err);
+      }
+    };
+  
+    testProvider();
+  }, []);
   
   // This would be called by the form to handle changes
   const handleInputChange = (e) => {
