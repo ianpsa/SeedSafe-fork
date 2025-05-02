@@ -1,10 +1,15 @@
 // Importação direta da imagem
 import { Link } from "react-router-dom";
 import heroImage from "../assets/DesignToken.png"; // Ajuste o caminho conforme necessário
+import bgPattern from "../assets/bg-pattern.svg";
 
-const Hero = ({ openWalletModal }) => {
+
+const Hero = ({ openWalletModal, backgroundStyle }) => {
   return (
-    <div className="flex md:flex-row justify-center items-center gap-12 px-8 py-12">
+    <div
+      className="flex md:flex-row justify-center items-center gap-12 px-8 py-12"
+      style={backgroundStyle}
+    >
       <div className="flex-1 md:max-w-[600px]">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
           Tokenize your harvest, <br />
