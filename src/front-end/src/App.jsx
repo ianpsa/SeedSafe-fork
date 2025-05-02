@@ -34,6 +34,45 @@ import OnboardingButton from "./components/Onboardingbutton";
 import WelcomeBack from "./components/WelcomeBack";
 import ButtonTooltips from "./components/ButtonToolTips";
 
+// Add global styles for interactive guides
+const addGlobalStyles = () => {
+  const style = document.createElement('style');
+  style.id = 'seedsafe-global-styles';
+  style.innerHTML = `
+    .highlight-target {
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+    
+    .animation-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  
+  // Only add if not already present
+  if (!document.getElementById('seedsafe-global-styles')) {
+    document.head.appendChild(style);
+  }
+};
+
 function App() {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -48,7 +87,18 @@ function App() {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    
+    // Add global styles
+    addGlobalStyles();
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      // Clean up styles if needed
+      const style = document.getElementById('seedsafe-global-styles');
+      if (style) {
+        document.head.removeChild(style);
+      }
+    };
   }, []);
 
   // Setup onboarding to show immediately on page load for first-time users
