@@ -33,20 +33,6 @@ const Hero = ({ openWalletModal, backgroundStyle }) => {
             <i className="fas fa-chart-line"></i> I'm an Investor
           </Link>
         </div>
-        <div className="flex flex-wrap gap-8">
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-green-800">120+</span>
-            <span className="text-sm text-gray-600">Active Producers</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-green-800">X NERO</span>
-            <span className="text-sm text-gray-600">Captured in 2025</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-green-800">5.8K</span>
-            <span className="text-sm text-gray-600">TCO₂ tokenized</span>
-          </div>
-        </div>
       </div>
       <div className="py-12 flex justify-center items-center">
         <img
