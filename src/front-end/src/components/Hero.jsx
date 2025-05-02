@@ -7,7 +7,7 @@ import bgPattern from "../assets/bg-pattern.svg";
 const Hero = ({ openWalletModal, backgroundStyle }) => {
   return (
     <div
-      className="flex md:flex-row justify-center items-center gap-12 px-8 py-12"
+      className="sm:flex-col lg:flex flex-row justify-center items-center gap-12 px-8 py-12"
       style={backgroundStyle}
     >
       <div className="flex-1 md:max-w-[600px]">
@@ -48,7 +48,7 @@ const Hero = ({ openWalletModal, backgroundStyle }) => {
           </div>
         </div>
       </div>
-      <div className="flex justify-center items-center">
+      <div className="py-12 flex justify-center items-center">
         <img
           src={heroImage || "/placeholder.svg"}
           alt="Agricultura tokenizada sustentável"
