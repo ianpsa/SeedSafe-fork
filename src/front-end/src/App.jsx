@@ -7,6 +7,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { useAccount, useDisconnect } from 'wagmi';
+
 // Importação direta dos assets
 import bgPattern from "./assets/bg-pattern.svg";
 
@@ -30,10 +32,56 @@ import Auditor from "./components/Auditor";
 function App() {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Replace simple boolean with wallet details
+  const [walletInfo, setWalletInfo] = useState(null); // Stores { address, signer, provider, chainId, role, isSmartAccount, eoaAddress? }
   const [currentPage, setCurrentPage] = useState("home");
-  const [userRole, setUserRole] = useState(null); // 'producer', 'investor', 'auditor'
 
+  // Wagmi hooks for EOA connection state
+  const { address: eoaAddress, isConnected: isEoaConnected, connector } = useAccount();
+  const { disconnect: disconnectWagmi } = useDisconnect();
+
+  // --- Login/Logout Logic --- 
+
+  // Called by WalletModal upon successful connection (both AA and EOA)
+  const handleLogin = (role, connectionDetails) => {
+    console.log(`Login successful as ${role}:`, connectionDetails);
+    setWalletInfo({ 
+      ...connectionDetails, 
+      role: role 
+    });
+    setIsWalletModalOpen(false); // Close modal on successful login
+    document.body.style.overflow = "auto";
+  };
+
+  // Unified logout function
+  const handleLogout = () => {
+    console.log("Logging out...");
+    if (walletInfo?.isSmartAccount) {
+      // Logout from Web3Auth if it was used for AA
+      console.log("Web3Auth logout should be handled here if applicable.");
+    } else {
+      // Disconnect EOA wallet using Wagmi
+      disconnectWagmi();
+    }
+    setWalletInfo(null); // Clear wallet info
+  };
+
+  // Effect to handle EOA login via RainbowKit/Wagmi
+  useEffect(() => {
+    // If Wagmi connects an EOA and no walletInfo is set yet (or previous was AA)
+    if (isEoaConnected && eoaAddress && (!walletInfo || walletInfo.isSmartAccount)) {
+      console.log("Wagmi EOA connected:", eoaAddress);
+      // Default login as investor for EOA wallets
+      handleLogin("investor", { 
+        address: eoaAddress, 
+        // Safely access chainId using optional chaining
+        chainId: connector?.chains?.[0]?.id,
+        isSmartAccount: false 
+      });
+    }
+  }, [isEoaConnected, eoaAddress, walletInfo, connector]);
+
+  // --- UI State & Styling --- 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -51,23 +99,27 @@ function App() {
     document.body.style.overflow = "auto";
   };
 
-  // Simular login para demonstração
-  const handleLogin = (role) => {
-    setIsLoggedIn(true);
-    setUserRole(role);
-  };
-
-  // Simular logout
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserRole(null);
-  };
-
   const backgroundStyle = !isMobile ? {
-  backgroundImage: `url(${bgPattern})`,
-  backgroundSize: "auto",
-  backgroundPosition: "center",
-} : {};
+    backgroundImage: `url(${bgPattern})`,
+    backgroundSize: "auto",
+    backgroundPosition: "center",
+  } : {};
+
+  const isLoggedIn = !!walletInfo;
+  const userRole = walletInfo?.role;
+
+  // Redirect handler for routes that require authentication
+  const RequireAuth = ({ children, requiredRole }) => {
+    if (!isLoggedIn) {
+      return <Navigate to="/" replace />;
+    }
+    
+    if (requiredRole && userRole !== requiredRole) {
+      return <Navigate to="/" replace />;
+    }
+    
+    return children;
+  };
 
   return (
     <Router>
@@ -88,6 +140,7 @@ function App() {
             openWalletModal={openWalletModal}
             isLoggedIn={isLoggedIn}
             userRole={userRole}
+            userAddress={walletInfo?.address}
             onLogout={handleLogout}
           />
 
@@ -102,6 +155,7 @@ function App() {
 
         <main className="w-full">
           <Routes>
+            {/* Home page */}
             <Route
               path="/"
               element={
@@ -114,6 +168,8 @@ function App() {
                 </>
               }
             />
+            
+            {/* Marketplace - accessible to all */}
             <Route
               path="/marketplace"
               element={
@@ -125,40 +181,48 @@ function App() {
                   }`}
                   style={backgroundStyle}
                 >
-                  <Marketplace />
+                  <Marketplace walletInfo={walletInfo} />
                 </div>
               }
-            />{" "}
+            />
+            
+            {/* Crop Registration - only for producers */}
             <Route
               path="/register"
               element={
-                <RegistrationProcess
-                  setCurrentPage={setCurrentPage}
-                  isLoggedIn={isLoggedIn}
-                  setIsLoggedIn={setIsLoggedIn}
-                />
+                <RequireAuth requiredRole="producer">
+                  <div className="bg-white">
+                    <RegistrationProcess walletInfo={walletInfo} />
+                  </div>
+                </RequireAuth>
               }
             />
+            
+            {/* Auditor Panel - only for auditors */}
             <Route
               path="/auditor"
               element={
-                isLoggedIn && userRole === "auditor" ? (
-                  <Auditor />
-                ) : (
-                  <Navigate to="/" replace />
-                )
+                <RequireAuth requiredRole="auditor">
+                  <Auditor walletInfo={walletInfo} />
+                </RequireAuth>
               }
             />
+            
+            {/* Fallback for unknown routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
         <Footer />
 
-        <WalletModal
-          isOpen={isWalletModalOpen}
-          onClose={closeWalletModal}
-          onLogin={handleLogin}
-        />
+        {/* Modal de Carteira */}
+        {isWalletModalOpen && (
+          <WalletModal
+            isOpen={isWalletModalOpen}
+            onClose={closeWalletModal}
+            onLogin={handleLogin}
+          />
+        )}
 
         <ChatbotWidget />
       </div>
