@@ -4,13 +4,10 @@ import CropForm from './CropForm';
 import LoginForm from './LoginForm';
 import VerificationStatus from './VerificationStatus';
 import MarketplaceStatus from './MarketplaceStatus';
-import CropRegistrationOnboarding from './CropRegistrationOnboarding';
-import RegistrationHowItWorksButton from './RegistrationHowItWorksButton';
 
 const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showLogin, setShowLogin] = useState(false);
-  const [showGuide, setShowGuide] = useState(false); // State for showing the guide
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
@@ -25,17 +22,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   });
   const [registrationStatus, setRegistrationStatus] = useState(null); // 'pending', 'approved', 'rejected'
   const [salesProgress, setSalesProgress] = useState(0); // Percentage of crop sold
-  
-  // Function to handle "How It Works" button click
-  const handleHowItWorksClick = () => {
-    console.log("How It Works button clicked");
-    setShowGuide(true);
-  };
-  
-  // Function to handle guide close
-  const handleGuideClose = () => {
-    setShowGuide(false);
-  };
   
   // Function to handle login form changes
   const handleLoginChange = (e) => {
@@ -179,17 +165,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
             setCurrentPage={setCurrentPage}
           />
         )}
-      </div>
-      
-      {/* Registration Guide Modal */}
-      <CropRegistrationOnboarding 
-        isOpen={showGuide} 
-        onComplete={handleGuideClose}
-      />
-      
-      {/* How It Works Button - Fixed position with proper z-index */}
-      <div id="registration-buttons-container">
-        <RegistrationHowItWorksButton onClick={handleHowItWorksClick} />
       </div>
       
       {/* Blockchain security information banner */}

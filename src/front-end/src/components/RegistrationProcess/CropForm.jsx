@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Leaf, 
   Calendar, 
@@ -14,7 +14,6 @@ import {
   Shield
 } from 'lucide-react';
 import SecurityInfoCard from './SecurityInfoCard';
-import FieldGuide from './FieldGuide';
 
 // Tooltip component
 const Tooltip = ({ children, content, position = "top" }) => {
@@ -88,29 +87,9 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
     formData.sustainablePractices || []
   );
   
-  // Interactive guide state
-  const [showGuide, setShowGuide] = useState(false);
-  
   // Form validation state
   const [dateError, setDateError] = useState('');
   const [areaError, setAreaError] = useState('');
-  
-  // Check if it's the first visit to show the guide
-  useEffect(() => {
-    const hasSeenGuide = localStorage.getItem("seedsafe_field_guide_completed");
-    if (!hasSeenGuide) {
-      // Small delay to ensure components are rendered
-      setTimeout(() => {
-        setShowGuide(true);
-      }, 800);
-    }
-  }, []);
-  
-  // Handle guide completion
-  const handleGuideComplete = () => {
-    localStorage.setItem("seedsafe_field_guide_completed", "true");
-    setShowGuide(false);
-  };
   
   // Handle card selection
   const handlePracticeSelection = (practiceId, isSelected) => {
@@ -210,22 +189,6 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
   return (
     <div className="animate-fadeIn">
       <h2 className="text-xl font-semibold text-green-800 mb-4">Crop Details</h2>
-      
-      {/* Interactive Field Guide */}
-      <FieldGuide isActive={showGuide} onComplete={handleGuideComplete} />
-      
-      {/* Add CSS for highlighted elements */}
-      <style jsx global>{`
-        .highlight-target {
-          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5);
-          animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-          70% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-      `}</style>
       
       {/* Security information card - expandable */}
       <SecurityInfoCard />

@@ -28,29 +28,15 @@ import Marketplace from "./components/Marketplace/Index";
 import RegistrationProcess from "./components/RegistrationProcess";
 import Auditor from "./components/Auditor";
 
-// Import new onboarding components
+// Keep the main onboarding components
 import Onboarding from "./components/onboarding";
-import GuidedTour from "./components/GuidedTour";
 import OnboardingButton from "./components/Onboardingbutton";
-import WelcomeBack from "./components/WelcomeBack";
-import CropRegistrationOnboarding from "./components/RegistrationProcess/CropRegistrationOnboarding";
-import ButtonTooltips from "./components/ButtonToolTips";
 
 // Add global styles for interactive guides
 const addGlobalStyles = () => {
   const style = document.createElement('style');
   style.id = 'seedsafe-global-styles';
   style.innerHTML = `
-    .highlight-target {
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-      70% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-    }
-    
     .animation-float {
       animation: float 3s ease-in-out infinite;
     }
@@ -68,19 +54,7 @@ const addGlobalStyles = () => {
       100% { opacity: 1; transform: translateY(0); }
     }
     
-    /* Posicionamento específico para os botões de onboarding */
-    #registration-buttons-container {
-      position: fixed;
-      bottom: 90px; /* Posicionado acima do botão de onboarding geral */
-      left: 16px;
-      z-index: 999 !important;
-    }
-    
-    #registration-buttons-container button {
-      z-index: 60 !important; /* Um z-index menor que o do modal, mas maior que outros elementos */
-    }
-    
-    /* Garante que o botão de onboarding geral fique abaixo do botão de registro */
+    /* Posicionamento específico para o botão de onboarding geral */
     .onboarding-general-button {
       position: fixed !important;
       bottom: 20px !important;
@@ -114,7 +88,6 @@ function App() {
   const [currentPage, setCurrentPage] = useState("home");
   const [userRole, setUserRole] = useState(null); // 'producer', 'investor', 'auditor'
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showGuidedTour, setShowGuidedTour] = useState(false);
   const [pageLoaded, setPageLoaded] = useState(false);
 
   useEffect(() => {
@@ -145,11 +118,6 @@ function App() {
     if (!hasCompletedOnboarding) {
       // Show onboarding immediately without delay
       setShowOnboarding(true);
-    } else {
-      // For returning users who have completed onboarding
-      // Check if they should see the welcome back notification
-      const visitCount = parseInt(localStorage.getItem("seedsafe_visit_count") || "0");
-      localStorage.setItem("seedsafe_visit_count", (visitCount + 1).toString());
     }
   }, []);
 
@@ -167,14 +135,6 @@ function App() {
   const handleLogin = (role) => {
     setIsLoggedIn(true);
     setUserRole(role);
-    
-    // If onboarding was just completed and user logged in, 
-    // show the guided tour immediately
-    const hasCompletedGuidedTour = localStorage.getItem("seedsafe_guided_tour_shown");
-    if (!hasCompletedGuidedTour) {
-      // Show guided tour immediately without delay
-      setShowGuidedTour(true);
-    }
   };
 
   // Simular logout
@@ -185,10 +145,6 @@ function App() {
   
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
-  };
-  
-  const handleGuidedTourComplete = () => {
-    setShowGuidedTour(false);
   };
   
   const handleStartOnboarding = () => {
@@ -308,29 +264,16 @@ function App() {
         {/* Only render these components after page has loaded */}
         {pageLoaded && (
           <>
-            {/* Onboarding Components - now controlled by state */}
+            {/* Onboarding Components - only keep the main one */}
             <Onboarding 
               isOpen={showOnboarding}
               onComplete={handleOnboardingComplete} 
             />
             
-            {/* Guided Tour - now shows immediately after login */}
-            <GuidedTour 
-              userType={userRole} 
-              isActive={showGuidedTour} 
-              onComplete={handleGuidedTourComplete} 
-            />
-            
             {/* Onboarding Button - persistent and always visible */}
             <OnboardingButton onClick={handleStartOnboarding} />
-            
-            {/* Welcome Back notification for returning users */}
-            <WelcomeBack userRole={userRole} />
-            
-            {/* Button tooltips shown immediately for first-time users */}
-            <ButtonTooltips />
 
-            {/* Chatbot Widget - give it a class name for the Guided Tour to target */}
+            {/* Chatbot Widget */}
             <div className="agrobot-button">
               <ChatbotWidget />
             </div>
