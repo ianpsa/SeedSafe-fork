@@ -66,10 +66,10 @@ const WelcomeBack = ({ userRole, onClose }) => {
   if (!isVisible) return null
   
   return (
-    <div className="fixed bottom-20 right-4 z-50 w-80 transition-all duration-300 transform animate-slideInUp">
+    <div className="fixed bottom-20 right-4 z-50 w-64 transition-all duration-300 transform animate-slideInUp">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-green-200">
-        <div className="bg-gradient-to-r from-green-600 to-green-500 text-white p-4 flex justify-between items-center">
-          <h3 className="font-bold">SeedSafe</h3>
+        <div className="bg-gradient-to-r from-green-600 to-green-500 text-white p-2 flex justify-between items-center">
+          <h3 className="font-bold text-sm">SeedSafe</h3>
           <button 
             onClick={handleClose}
             className="text-white/80 hover:text-white focus:outline-none"
@@ -77,14 +77,14 @@ const WelcomeBack = ({ userRole, onClose }) => {
             <i className="fas fa-times"></i>
           </button>
         </div>
-        <div className="p-4">
-          <p className="font-medium mb-2">{getWelcomeMessage()}</p>
-          <p className="text-sm text-gray-600 mb-4">{getActionText()}</p>
+        <div className="p-3">
+          <p className="font-medium text-sm mb-1">{getWelcomeMessage()}</p>
+          <p className="text-xs text-gray-600 mb-3">{getActionText()}</p>
           
           <div className="flex gap-2">
             <button
               onClick={handleClose}
-              className={`py-2 px-4 rounded-md text-sm font-medium ${
+              className={`py-1.5 px-3 rounded-md text-xs font-medium ${
                 userRole === "producer" 
                   ? "bg-green-600 text-white hover:bg-green-700" 
                   : "bg-amber-600 text-white hover:bg-amber-700"
@@ -94,7 +94,7 @@ const WelcomeBack = ({ userRole, onClose }) => {
             </button>
             <button
               onClick={handleClose}
-              className="py-2 px-4 rounded-md text-sm font-medium border border-gray-300 hover:bg-gray-100 transition-colors"
+              className="py-1.5 px-3 rounded-md text-xs font-medium border border-gray-300 hover:bg-gray-100 transition-colors"
             >
               Dismiss
             </button>

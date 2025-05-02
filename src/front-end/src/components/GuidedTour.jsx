@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react"
 const Tooltip = ({ content, position, arrowPosition, onClose, onNext, onPrevious, currentStep, totalSteps }) => {
   return (
     <div 
-      className="absolute z-50 bg-white rounded-lg shadow-xl p-4 w-64 animate-fadeIn"
+      className="absolute z-50 bg-white rounded-lg shadow-xl p-3 w-52 animate-fadeIn"
       style={position}
     >
       {/* Arrow */}
@@ -16,7 +16,7 @@ const Tooltip = ({ content, position, arrowPosition, onClose, onNext, onPrevious
       
       {/* Content */}
       <div className="relative">
-        <div className="mb-4">
+        <div className="mb-3 text-xs">
           {content}
         </div>
         
@@ -25,11 +25,11 @@ const Tooltip = ({ content, position, arrowPosition, onClose, onNext, onPrevious
           <div className="text-xs text-gray-500">
             {currentStep} of {totalSteps}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             {currentStep > 1 && (
               <button 
                 onClick={onPrevious}
-                className="text-sm py-1 px-3 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                className="text-xs py-1 px-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
               >
                 Back
               </button>
@@ -37,16 +37,16 @@ const Tooltip = ({ content, position, arrowPosition, onClose, onNext, onPrevious
             {currentStep < totalSteps ? (
               <button 
                 onClick={onNext}
-                className="text-sm py-1 px-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                className="text-xs py-1 px-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
               >
                 Next
               </button>
             ) : (
               <button 
                 onClick={onClose}
-                className="text-sm py-1 px-3 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
+                className="text-xs py-1 px-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors"
               >
-                Finish
+                Done
               </button>
             )}
           </div>
@@ -55,7 +55,7 @@ const Tooltip = ({ content, position, arrowPosition, onClose, onNext, onPrevious
         {/* Close button */}
         <button 
           onClick={onClose}
-          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors"
+          className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors"
         >
           <i className="fas fa-times text-xs"></i>
         </button>

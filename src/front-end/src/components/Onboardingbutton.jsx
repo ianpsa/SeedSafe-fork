@@ -27,13 +27,13 @@ const OnboardingButton = ({ onClick }) => {
           setIsVisible(false)
           if (onClick) onClick()
         }}
-        className="bg-green-600 text-white rounded-full p-3 shadow-lg flex items-center justify-center hover:bg-green-700 transition-colors group"
+        className="bg-green-600 text-white rounded-full p-2 shadow-md flex items-center justify-center hover:bg-green-700 transition-colors group"
         aria-label="Need help with SeedSafe?"
       >
-        <div className="absolute right-full mr-3 px-3 py-2 bg-white rounded-lg shadow-md text-sm font-medium text-gray-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-          Need help with SeedSafe?
+        <div className="absolute right-full mr-2 px-2 py-1 bg-white rounded-lg shadow-md text-xs font-medium text-gray-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+          Need help?
         </div>
-        <i className="fas fa-question-circle text-xl"></i>
+        <i className="fas fa-question-circle text-sm"></i>
       </button>
     </div>
   )
