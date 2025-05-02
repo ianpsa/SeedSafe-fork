@@ -4,6 +4,7 @@ import CropForm from './CropForm';
 import LoginForm from './LoginForm';
 import VerificationStatus from './VerificationStatus';
 import MarketplaceStatus from './MarketplaceStatus';
+import WalletConnect from '../WalletConnect';
 
 const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -124,9 +125,12 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   
   return (
     <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center animate-fadeIn">
-        Register Your Crop
-      </h1>
+    
+    <WalletConnect />
+
+    <h1 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center animate-fadeIn">
+      Register Your Crop
+    </h1>
       
       {/* Step Progress Circles */}
       <StepCircles currentStep={currentStep} registrationStatus={registrationStatus} />
