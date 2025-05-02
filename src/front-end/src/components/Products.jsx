@@ -207,9 +207,10 @@ const Products = () => {
                 id={productId}
                 isActive={activeTab === productId}
               >
-                <div className="flex flex-col md:flex-row gap-8 items-center">
+                <div className=" sm:flex-col md:flex-col  lg:flex flex-row  gap-8 items-center">
+                  {/* Image section - Left side */}
                   <motion.div 
-                    className="md:w-2/5 min-w-[200px]"
+                    className="md:w-2/5 min-w-[200px] order-2 md:order-1 py-5"
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
@@ -227,8 +228,10 @@ const Products = () => {
                       />
                     </motion.div>
                   </motion.div>
+                  
+                  {/* Content section - Right side */}
                   <motion.div 
-                    className="md:w-3/5"
+                    className="md:w-3/5 order-1 md:order-2"
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
