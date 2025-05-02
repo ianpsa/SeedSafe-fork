@@ -5,6 +5,9 @@ import LoginForm from './LoginForm';
 import VerificationStatus from './VerificationStatus';
 import MarketplaceStatus from './MarketplaceStatus';
 import WalletConnect from '../WalletConnect';
+import { getSigner } from "../../utils/aaUtils";
+import { registerHarvestUserOp } from "../../utils/userOp/registerHarvestUserOp";
+
 
 const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -42,13 +45,35 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   };
   
   // Function to handle form submission for step 1
-  const handleStepOneSubmit = (e) => {
+  const handleStepOneSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you'd validate the form here
-    
-    // Show login form after submission
-    setShowLogin(true);
+  
+    try {
+      const signer = await getSigner();
+  
+      // Ajustar campos
+      const crop = formData.cropType;
+      const quantity = parseInt(formData.quantity);
+      const price = 25; // fixo ou crie um campo no form
+      const deliveryDate = Math.floor(new Date(formData.harvestDate).getTime() / 1000); // timestamp
+      const doc = formData.location || "doc://placeholder"; // ou outro campo
+  
+      await registerHarvestUserOp(signer, {
+        crop,
+        quantity,
+        price,
+        deliveryDate,
+        doc,
+      });
+  
+      // Após envio bem-sucedido:
+      setShowLogin(true);
+    } catch (err) {
+      console.error("Erro ao registrar safra:", err);
+      alert("Erro ao registrar safra. Veja o console.");
+    }
   };
+  
   
   // Continue to verification after login
   useEffect(() => {

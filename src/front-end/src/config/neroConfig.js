@@ -9,6 +9,7 @@ export const NERO_CHAIN_CONFIG = {
   export const CONTRACT_ADDRESSES = {
     entryPoint: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     accountFactory: "0x9406Cc6185a346906296840746125a0E44976454",
+    harvestManager: "0x0fC5025C764cE34df352757e82f7B5c4Df39A836",
   };
   
   export const AA_PLATFORM_CONFIG = {
