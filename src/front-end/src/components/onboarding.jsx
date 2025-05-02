@@ -4,35 +4,27 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 
 // Onboarding component with step-by-step guide
-const Onboarding = ({ onComplete }) => {
-  const [isOpen, setIsOpen] = useState(false)
+const Onboarding = ({ isOpen = false, onComplete }) => {
+  // Local state to handle internal component state
   const [currentStep, setCurrentStep] = useState(0)
   const [userType, setUserType] = useState(null)
   const navigate = useNavigate()
 
+  // Reset component state when reopened
   useEffect(() => {
-    // Check if this is the user's first visit
-    const hasCompletedOnboarding = localStorage.getItem("seedsafe_onboarding_completed")
-    
-    if (!hasCompletedOnboarding) {
-      // Delay the onboarding to allow the page to load first
-      const timer = setTimeout(() => {
-        setIsOpen(true)
-      }, 1500)
-      
-      return () => clearTimeout(timer)
+    if (isOpen) {
+      setCurrentStep(0)
+      setUserType(null)
     }
-  }, [])
+  }, [isOpen])
 
   const completeOnboarding = () => {
     localStorage.setItem("seedsafe_onboarding_completed", "true")
-    setIsOpen(false)
     if (onComplete) onComplete()
   }
 
   const skipOnboarding = () => {
     localStorage.setItem("seedsafe_onboarding_completed", "true")
-    setIsOpen(false)
     if (onComplete) onComplete()
   }
 

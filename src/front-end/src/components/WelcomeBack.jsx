@@ -17,9 +17,10 @@ const WelcomeBack = ({ userRole, onClose }) => {
     
     // Only show for returning users (visit count > 1) and when logged in
     if (newVisitCount > 1 && userRole) {
+      // Show immediately - minimal delay to ensure UI is ready
       setTimeout(() => {
         setIsVisible(true)
-      }, 1500)
+      }, 300)
       
       // Auto-hide after 8 seconds
       const timer = setTimeout(() => {

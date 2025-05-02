@@ -3,39 +3,69 @@
 import { useState, useEffect } from "react"
 
 const OnboardingButton = ({ onClick }) => {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(true) // Always visible by default
+  const [isMobile, setIsMobile] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   
   useEffect(() => {
-    // Check if onboarding was skipped previously
-    const hasCompletedOnboarding = localStorage.getItem("seedsafe_onboarding_completed")
-    const showedGuidedTour = localStorage.getItem("seedsafe_guided_tour_shown")
+    // Check screen size
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
     
-    // Only show the button if onboarding was skipped and guided tour wasn't shown
-    if (hasCompletedOnboarding === "true" && !showedGuidedTour) {
-      setTimeout(() => {
-        setIsVisible(true)
-      }, 5000) // Show after 5 seconds
+    // Initial check
+    checkMobile()
+    
+    // Add resize listener
+    window.addEventListener('resize', checkMobile)
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile)
     }
   }, [])
+  
+  const handleHelpClick = () => {
+    // Remove the completion flag to show onboarding again
+    localStorage.removeItem("seedsafe_onboarding_completed")
+    
+    // Call the provided onClick handler to show onboarding
+    if (onClick) onClick()
+  }
   
   if (!isVisible) return null
   
   return (
-    <div className="fixed bottom-20 left-4 z-40 animate-bounce">
+    <>
+      {/* Tooltip bubble that appears when hovering */}
+      <div 
+        className={`fixed z-40 left-4 ${
+          isMobile ? 'bottom-32' : 'bottom-24'
+        } bg-white p-2 rounded-lg shadow-lg transition-all duration-300 ${
+          isHovered ? "opacity-100 transform translate-x-0" : "opacity-0 transform -translate-x-4 pointer-events-none"
+        }`}
+      >
+        <div className="text-sm font-medium text-gray-700 max-w-[150px]">
+          Need help with SeedSafe? Click to see a guided tour!
+        </div>
+        <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-white rotate-45"></div>
+      </div>
+
+      {/* Help button */}
       <button
-        onClick={() => {
-          setIsVisible(false)
-          if (onClick) onClick()
-        }}
-        className="bg-green-600 text-white rounded-full p-2 shadow-md flex items-center justify-center hover:bg-green-700 transition-colors group"
+        onClick={handleHelpClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`fixed left-4 z-40 w-12 h-12 bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 transition-all duration-300 ${
+          isMobile ? 'bottom-20' : 'bottom-10'
+        } ${isHovered ? 'scale-110' : 'scale-100'}`}
         aria-label="Need help with SeedSafe?"
       >
-        <div className="absolute right-full mr-2 px-2 py-1 bg-white rounded-lg shadow-md text-xs font-medium text-gray-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-          Need help?
-        </div>
-        <i className="fas fa-question-circle text-sm"></i>
+        <i className="fas fa-question-circle text-xl"></i>
+
+        {/* Pulsing ring animation */}
+        <span className="absolute w-full h-full rounded-full border-4 border-green-400/30 animate-ping"></span>
       </button>
-    </div>
+    </>
   )
 }
 

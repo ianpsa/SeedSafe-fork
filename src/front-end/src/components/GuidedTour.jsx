@@ -170,7 +170,7 @@ const GuidedTour = ({ userType, isActive, onComplete }) => {
   useEffect(() => {
     if (!isActive) return
     
-    // Start the tour
+    // Start the tour immediately
     navigateToStep(1)
     
     // Save to localStorage to not show again
@@ -229,10 +229,10 @@ const GuidedTour = ({ userType, isActive, onComplete }) => {
       const scrollY = window.scrollY + rect.top - 100 // 100px padding
       window.scrollTo({ top: scrollY, behavior: "smooth" })
       
-      // Wait for scroll to finish before positioning tooltip
+      // Update tooltip position immediately
       setTimeout(() => {
         updateTooltipPosition()
-      }, 500)
+      }, 100)
     } else {
       console.warn(`Element not found for selector: ${step.selector}`)
       // Try to move to the next step
@@ -254,12 +254,12 @@ const GuidedTour = ({ userType, isActive, onComplete }) => {
     // Default position is below the element
     let tooltipPos = {
       top: `${rect.bottom + window.scrollY + 15}px`,
-      left: `${rect.left + window.scrollX + (rect.width / 2) - 128}px`, // Center the 256px tooltip
+      left: `${rect.left + window.scrollX + (rect.width / 2) - 104}px`, // Center the 208px tooltip
     }
     
     let arrowPos = {
       top: "-6px",
-      left: "128px", // Center of tooltip
+      left: "104px", // Center of tooltip
     }
     
     // Check if tooltip would go off the bottom
@@ -267,23 +267,23 @@ const GuidedTour = ({ userType, isActive, onComplete }) => {
       // Position above the element
       tooltipPos = {
         bottom: `${window.innerHeight - rect.top - window.scrollY + 15}px`,
-        left: `${rect.left + window.scrollX + (rect.width / 2) - 128}px`,
+        left: `${rect.left + window.scrollX + (rect.width / 2) - 104}px`,
       }
       arrowPos = {
         bottom: "-6px",
-        left: "128px",
+        left: "104px",
       }
     }
     
     // Check if tooltip would go off the sides
-    if (rect.left + (rect.width / 2) - 128 < 10) {
+    if (rect.left + (rect.width / 2) - 104 < 10) {
       // Too far left
       tooltipPos.left = "10px"
       arrowPos.left = `${rect.left + (rect.width / 2) - 10}px`
-    } else if (rect.left + (rect.width / 2) + 128 > viewportWidth - 10) {
+    } else if (rect.left + (rect.width / 2) + 104 > viewportWidth - 10) {
       // Too far right
-      tooltipPos.left = `${viewportWidth - 266}px`
-      arrowPos.left = `${rect.left + (rect.width / 2) - (viewportWidth - 266)}px`
+      tooltipPos.left = `${viewportWidth - 218}px`
+      arrowPos.left = `${rect.left + (rect.width / 2) - (viewportWidth - 218)}px`
     }
     
     setTooltipPosition(tooltipPos)

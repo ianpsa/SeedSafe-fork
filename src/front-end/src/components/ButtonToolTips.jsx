@@ -37,7 +37,7 @@ const ButtonTooltips = () => {
     const hasCompletedOnboarding = localStorage.getItem("seedsafe_onboarding_completed")
     
     if (!hasCompletedOnboarding) {
-      // Find all target buttons after DOM is loaded
+      // Find all target buttons immediately - just a minimal delay to ensure DOM is loaded
       setTimeout(() => {
         identifyButtons()
         setIsVisible(true)
@@ -48,7 +48,7 @@ const ButtonTooltips = () => {
         }, 15000)
         
         return () => clearTimeout(timer)
-      }, 2000)
+      }, 300) // Very short delay to ensure DOM is loaded
     }
   }, [])
   
