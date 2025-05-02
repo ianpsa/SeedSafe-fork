@@ -1,6 +1,7 @@
 // Importação direta da imagem
 import { Link } from "react-router-dom";
 import heroImage from "../assets/DesignToken.png"; // Ajuste o caminho conforme necessário
+import { ButtonTooltip } from "./ButtonTooltips"; // Import the ButtonTooltip component
 
 const Hero = ({ openWalletModal }) => {
   return (
@@ -15,18 +16,25 @@ const Hero = ({ openWalletModal }) => {
           positive environmental impact, all with no fees on the NERO Chain.{" "}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Link
-            to="/register"
-            className="py-4 px-8 rounded-md text-lg font-semibold bg-green-700 text-white hover:bg-green-800 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
-          >
-            <i className="fas fa-seedling"></i> I'm a Producer
-          </Link>
-          <Link
-            to="/marketplace"
-            className="py-4 px-8 rounded-md text-lg font-semibold bg-amber-600 text-white hover:bg-amber-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
-          >
-            <i className="fas fa-chart-line"></i> I'm an Investor
-          </Link>
+          {/* Enhanced with tooltip */}
+          <ButtonTooltip text="Register your crop details and sustainable practices to receive advance funding">
+            <Link
+              to="/register"
+              className="py-4 px-8 rounded-md text-lg font-semibold bg-green-700 text-white hover:bg-green-800 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+            >
+              <i className="fas fa-seedling"></i> I'm a Producer
+            </Link>
+          </ButtonTooltip>
+          
+          {/* Enhanced with tooltip */}
+          <ButtonTooltip text="Browse available harvest tokens and carbon credits to support sustainable agriculture">
+            <Link
+              to="/marketplace"
+              className="py-4 px-8 rounded-md text-lg font-semibold bg-amber-600 text-white hover:bg-amber-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+            >
+              <i className="fas fa-chart-line"></i> I'm an Investor
+            </Link>
+          </ButtonTooltip>
         </div>
         <div className="flex flex-wrap gap-8">
           <div className="flex flex-col">
