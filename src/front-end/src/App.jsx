@@ -33,6 +33,7 @@ import Onboarding from "./components/onboarding";
 import GuidedTour from "./components/GuidedTour";
 import OnboardingButton from "./components/Onboardingbutton";
 import WelcomeBack from "./components/WelcomeBack";
+import CropRegistrationOnboarding from "./components/RegistrationProcess/CropRegistrationOnboarding";
 import ButtonTooltips from "./components/ButtonToolTips";
 
 // Add global styles for interactive guides
@@ -65,6 +66,26 @@ const addGlobalStyles = () => {
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(10px); }
       100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Posicionamento específico para os botões de onboarding */
+    #registration-buttons-container {
+      position: fixed;
+      bottom: 90px; /* Posicionado acima do botão de onboarding geral */
+      left: 16px;
+      z-index: 999 !important;
+    }
+    
+    #registration-buttons-container button {
+      z-index: 60 !important; /* Um z-index menor que o do modal, mas maior que outros elementos */
+    }
+    
+    /* Garante que o botão de onboarding geral fique abaixo do botão de registro */
+    .onboarding-general-button {
+      position: fixed !important;
+      bottom: 20px !important;
+      left: 16px !important;
+      z-index: 50 !important;
     }
   `;
   

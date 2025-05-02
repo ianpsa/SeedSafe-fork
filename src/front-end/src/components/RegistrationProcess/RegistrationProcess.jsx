@@ -4,12 +4,13 @@ import CropForm from './CropForm';
 import LoginForm from './LoginForm';
 import VerificationStatus from './VerificationStatus';
 import MarketplaceStatus from './MarketplaceStatus';
-import CropRegistrationGuide from './CropRegistrationGuide';
+import CropRegistrationOnboarding from './CropRegistrationOnboarding';
+import RegistrationHowItWorksButton from './RegistrationHowItWorksButton';
 
 const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showLogin, setShowLogin] = useState(false);
-  const [showGuide, setShowGuide] = useState(false); // State for showing the initial guide
+  const [showGuide, setShowGuide] = useState(false); // State for showing the guide
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
@@ -19,20 +20,22 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
     quantity: '',
     harvestDate: '',
     location: '',
-    area: '',  // Campo adicional para área da fazenda
+    area: '',
     sustainablePractices: []
   });
   const [registrationStatus, setRegistrationStatus] = useState(null); // 'pending', 'approved', 'rejected'
   const [salesProgress, setSalesProgress] = useState(0); // Percentage of crop sold
   
-  // Check if it's the first visit to show the guide
-  useEffect(() => {
-    const hasSeenGuide = localStorage.getItem("seedsafe_crop_guide_completed");
-    if (!hasSeenGuide) {
-      // Show guide immediately
-      setShowGuide(true);
-    }
-  }, []);
+  // Function to handle "How It Works" button click
+  const handleHowItWorksClick = () => {
+    console.log("How It Works button clicked");
+    setShowGuide(true);
+  };
+  
+  // Function to handle guide close
+  const handleGuideClose = () => {
+    setShowGuide(false);
+  };
   
   // Function to handle login form changes
   const handleLoginChange = (e) => {
@@ -67,17 +70,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
       setRegistrationStatus('pending');
     }
   }, [isLoggedIn, showLogin, currentStep]);
-  
-  // Handle guide completion
-  const handleGuideComplete = () => {
-    localStorage.setItem("seedsafe_crop_guide_completed", "true");
-    setShowGuide(false);
-  };
-  
-  // Handle guide closure
-  const handleGuideClose = () => {
-    setShowGuide(false);
-  };
   
   // Simulate auditor decision (approve/reject)
   const simulateAuditorDecision = (decision) => {
@@ -121,9 +113,9 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
     });
   };
   
-  // Calcular os créditos de carbono com base nas práticas sustentáveis
+  // Calculate carbon credits based on sustainable practices
   const calculateCarbonCredits = () => {
-    // Base de crédito por prática (toneladas por hectare)
+    // Base credit per practice (tons per hectare)
     const practiceCredits = {
       organic: 1.2,
       conservation: 0.8,
@@ -131,7 +123,7 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
       water: 0.4
     };
     
-    // Calcular com base nas práticas e área da fazenda
+    // Calculate based on practices and farm area
     let totalCredits = 0;
     formData.sustainablePractices.forEach(practice => {
       if (practiceCredits[practice]) {
@@ -139,44 +131,13 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
       }
     });
     
-    // Multiplicar pela área total da fazenda
-    const area = parseFloat(formData.area) || 1; // Fallback para 1 se não houver área
+    // Multiply by total farm area
+    const area = parseFloat(formData.area) || 1; // Fallback to 1 if no area
     return (totalCredits * area).toFixed(2);
   };
   
-  // Add CSS for the interactive guide visualization
-  useEffect(() => {
-    // Add global styles for interactive guides
-    const style = document.createElement('style');
-    style.innerHTML = `
-      .highlight-target {
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5);
-        animation: pulse 2s infinite;
-      }
-      @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-        70% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-      }
-      
-      .animation-float {
-        animation: float 3s ease-in-out infinite;
-      }
-      @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
-  
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto py-8 relative">
       <h1 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center animate-fadeIn">
         Register Your Crop
       </h1>
@@ -220,12 +181,16 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
         )}
       </div>
       
-      {/* Registration Guide - Full screen walkthrough */}
-      <CropRegistrationGuide 
+      {/* Registration Guide Modal */}
+      <CropRegistrationOnboarding 
         isOpen={showGuide} 
-        onClose={handleGuideClose} 
-        onComplete={handleGuideComplete} 
+        onComplete={handleGuideClose}
       />
+      
+      {/* How It Works Button - Fixed position with proper z-index */}
+      <div id="registration-buttons-container">
+        <RegistrationHowItWorksButton onClick={handleHowItWorksClick} />
+      </div>
       
       {/* Blockchain security information banner */}
       <div className="mt-6 bg-blue-50 rounded-lg p-4 text-blue-800 text-sm shadow-sm border border-blue-100">
