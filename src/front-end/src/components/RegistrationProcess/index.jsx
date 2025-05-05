@@ -6,6 +6,7 @@ import VerificationStatus from './VerificationStatus';
 import MarketplaceStatus from './MarketplaceStatus';
 import WalletConnect from '../WalletConnect';
 import { getSigner } from "../../utils/aaUtils";
+import { ethers } from "ethers";
 import { registerHarvestUserOp } from "../../utils/userOp/registerHarvestUserOp";
 
 
@@ -104,7 +105,9 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
     const testProvider = async () => {
       try {
         const { JsonRpcProvider } = await import("ethers");
-        const provider = new JsonRpcProvider("https://rpc-testnet.nerochain.io");
+
+        const provider = new ethers.providers.JsonRpcProvider("https://rpc-testnet.nerochain.io");
+
         const network = await provider.getNetwork();
         console.log("🔍 Resultado do getNetwork():", network);
       } catch (err) {

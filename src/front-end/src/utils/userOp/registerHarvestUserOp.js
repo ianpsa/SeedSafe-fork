@@ -1,5 +1,5 @@
 // src/userOp/registerHarvestUserOp.js
-import { Contract, parseUnits } from "ethers";
+import { ethers } from "ethers";
 import HarvestManagerAbi from "../../abi/abiHarvest.json";
 import { getUserOperationClient } from "./userOpClient";
 import { getSimpleAccountBuilder } from "./userOpBuilder";
@@ -13,11 +13,11 @@ export const registerHarvestUserOp = async (
     const contractAddress = CONTRACT_ADDRESSES.harvestManager;
     const builder = await getSimpleAccountBuilder(signer);
 
-    const contract = new Contract(contractAddress, HarvestManagerAbi);
+    const contract = new ethers.Contract(contractAddress, HarvestManagerAbi);
     const calldata = contract.interface.encodeFunctionData("createHarvest", [
       crop,
       quantity,
-      parseUnits(String(price), 18),
+      ethers.utils.parseUnits(String(price), 18),
       deliveryDate,
       doc,
     ]);
@@ -33,4 +33,5 @@ export const registerHarvestUserOp = async (
     throw err;
   }
 };
+
 
