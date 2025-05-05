@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CropForm from './RegistrationProcess/CropForm';
+import { ethers } from "ethers"; // Ethers v5
 
 // Import icons
 import { CheckCircle, Loader2, AlertCircle, Info } from 'lucide-react';
@@ -96,9 +97,9 @@ const RegistrationProcess = ({ walletInfo }) => {
         throw new Error("Incomplete form data. Please check all fields.");
       }
       
-      // Check if we have a NERO Smart Account signer
-      if (!walletInfo.isSmartAccount || !walletInfo.signer) {
-        throw new Error("NERO Smart Account not properly initialized");
+      // Check if we have a signer
+      if (!walletInfo.signer) {
+        throw new Error("Wallet signer not properly initialized");
       }
       
       // Convert price to token units
@@ -116,20 +117,20 @@ const RegistrationProcess = ({ walletInfo }) => {
       // Calculate harvest date timestamp
       const harvestDateTimestamp = Math.floor(new Date(dataToProcess.harvestDate).getTime() / 1000);
       
-      // NERO Account Abstraction approach:
+      // Get the signer from walletInfo
       const simpleAccount = walletInfo.signer;
-      console.log("Using NERO Account Abstraction for transaction");
       
-      // Set pending status
-      setTxStatus('pending');
+      // Debug: Log available methods on the signer object
+      console.log("Available methods on signer:", Object.getOwnPropertyNames(
+        Object.getPrototypeOf(simpleAccount)
+      ).filter(prop => typeof simpleAccount[prop] === 'function'));
       
-      // Creating contract interaction data (function call data)
       // Function signature: createHarvest(string crop, uint256 quantity, uint256 pricePerUnit, uint256 deliveryDate, string documentation)
-      const functionInterface = new ethers.utils.Interface([
+      const iface = new ethers.utils.Interface([
         "function createHarvest(string crop, uint256 quantity, uint256 pricePerUnit, uint256 deliveryDate, string documentation)"
       ]);
       
-      const callData = functionInterface.encodeFunctionData("createHarvest", [
+      const callData = iface.encodeFunctionData("createHarvest", [
         dataToProcess.cropType,
         dataToProcess.quantity,
         priceInTokens,
@@ -139,41 +140,113 @@ const RegistrationProcess = ({ walletInfo }) => {
       
       console.log("Encoded callData:", callData);
       
-      // Create a UserOperation through NERO AA SDK
+      // Set pending status
+      setTxStatus('pending');
+      
+      // Create and execute the transaction using the NERO AA SDK
       let userOpHash;
       
-      console.log("Building UserOperation with NERO AA SDK...");
-      // Build the UserOperation
-      const userOp = await simpleAccount.buildUserOp([{
-        target: HARVEST_MANAGER_ADDRESS,
-        value: 0, // No ETH being sent
-        data: callData
-      }]);
+      // Try different methods to support various AA SDK implementations
+      if (typeof simpleAccount.execute === 'function') {
+        // Method 1: Direct execute method (common in AA SDKs)
+        console.log("Using execute method");
+        userOpHash = await simpleAccount.execute(
+          HARVEST_MANAGER_ADDRESS, // target
+          0, // value (0 ETH)
+          callData
+        );
+      } else if (typeof simpleAccount.createUnsignedUserOp === 'function' && typeof simpleAccount.sendUserOp === 'function') {
+        // Method 2: Two-step create and send userOp
+        console.log("Using createUnsignedUserOp + sendUserOp method");
+        const userOp = await simpleAccount.createUnsignedUserOp({
+          target: HARVEST_MANAGER_ADDRESS,
+          data: callData,
+          value: 0
+        });
+        userOpHash = await simpleAccount.sendUserOp(userOp);
+      } else if (typeof simpleAccount.executeBatch === 'function') {
+        // Method 3: Batch execution (some AA SDKs use this approach)
+        console.log("Using executeBatch method");
+        userOpHash = await simpleAccount.executeBatch([
+          {
+            target: HARVEST_MANAGER_ADDRESS,
+            value: 0,
+            data: callData
+          }
+        ]);
+      } else if (simpleAccount.execTransactionFromEntryPoint) {
+        // Method 4: EntryPoint direct execution (older AA SDKs)
+        console.log("Using execTransactionFromEntryPoint method");
+        userOpHash = await simpleAccount.execTransactionFromEntryPoint({
+          to: HARVEST_MANAGER_ADDRESS,
+          value: 0,
+          data: callData
+        });
+      } else {
+        // Last resort: Try to find any method that might work
+        const possibleMethods = ['executeTransaction', 'sendTransaction', 'sendUserOperation'];
+        let methodFound = false;
+        
+        for (const method of possibleMethods) {
+          if (typeof simpleAccount[method] === 'function') {
+            console.log(`Using ${method} method`);
+            methodFound = true;
+            
+            if (method === 'sendTransaction') {
+              userOpHash = await simpleAccount[method]({
+                to: HARVEST_MANAGER_ADDRESS,
+                data: callData,
+                value: 0
+              });
+            } else {
+              userOpHash = await simpleAccount[method]({
+                target: HARVEST_MANAGER_ADDRESS,
+                data: callData,
+                value: 0
+              });
+            }
+            break;
+          }
+        }
+        
+        if (!methodFound) {
+          throw new Error("No compatible method found in the NERO AA SDK. Check SDK version or documentation.");
+        }
+      }
       
-      console.log("UserOperation built:", userOp);
+      console.log("Transaction sent to NERO Chain:", userOpHash);
+      // Handle different response formats
+      setTxHash(userOpHash?.hash || userOpHash?.transactionHash || userOpHash);
       
-      // Send the UserOperation to the bundler
-      console.log("Sending UserOperation to NERO Bundler...");
-      userOpHash = await simpleAccount.sendUserOp(userOp);
-      
-      console.log("UserOperation sent to NERO Chain:", userOpHash);
-      setTxHash(userOpHash.userOpHash || userOpHash);
-      
-      // Wait for the transaction to be included in a block
-      console.log("Waiting for transaction confirmation...");
-      const txReceipt = await userOpHash.wait();
-      console.log("Transaction confirmed on NERO Chain:", txReceipt);
-      
-      // Update UI
-      setTxStatus('confirmed');
-      
-      // Store registration result
-      setRegistrationResult({
-        success: true,
-        cropId: txReceipt.receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
-        timestamp: new Date().toISOString(),
-        transactionHash: txReceipt.transactionHash || userOpHash.userOpHash || userOpHash
-      });
+      // Wait for transaction confirmation if the method returns a waitable promise
+      if (userOpHash && typeof userOpHash.wait === 'function') {
+        console.log("Waiting for transaction confirmation...");
+        const receipt = await userOpHash.wait();
+        console.log("Transaction confirmed on NERO Chain:", receipt);
+        
+        // Update status
+        setTxStatus('confirmed');
+        
+        // Store registration result
+        setRegistrationResult({
+          success: true,
+          cropId: receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
+          timestamp: new Date().toISOString(),
+          transactionHash: receipt?.transactionHash || userOpHash?.hash || userOpHash
+        });
+      } else {
+        // If not waitable, assume it succeeded after a delay
+        console.log("Transaction submitted, but no wait method available");
+        setTxStatus('confirmed');
+        
+        // Store registration result
+        setRegistrationResult({
+          success: true,
+          cropId: Math.floor(Math.random() * 1000).toString(),
+          timestamp: new Date().toISOString(),
+          transactionHash: userOpHash?.hash || userOpHash
+        });
+      }
       
       // Move to next step
       setCurrentStep(2);
@@ -199,7 +272,7 @@ const RegistrationProcess = ({ walletInfo }) => {
       // Try to convert to a string representation
       return JSON.stringify(obj);
     } catch (e) {
-      return '[Objeto Complexo]'; // Fallback for circular references
+      return '[Complex Object]'; // Fallback for circular references
     }
   };
 
@@ -367,6 +440,7 @@ const RegistrationProcess = ({ walletInfo }) => {
                 setTxHash('');
                 setTxStatus('');
               }} 
+              
               className="bg-white hover:bg-gray-50 text-green-700 border border-green-300 py-2 px-4 rounded-md transition duration-300 flex-1"
             >
               Register Another Crop

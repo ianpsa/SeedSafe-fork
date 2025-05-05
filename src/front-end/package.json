@@ -20,7 +20,7 @@
     "caniuse-lite": "^1.0.30001714",
     "electron-to-chromium": "^1.5.138",
     "escalade": "^3.2.0",
-    "ethers": "^6.13.5",
+    "ethers": "^5.7.2",
     "fraction.js": "^4.3.7",
     "framer-motion": "^12.7.4",
     "lucide-react": "^0.288.0",
