@@ -22,15 +22,7 @@ export const registerHarvestUserOp = async (
       doc,
     ]);
 
-    const paymasterParams = {
-      type: 0,
-      rpc: AA_PLATFORM_CONFIG.paymasterRpc,
-      apikey: AA_PLATFORM_CONFIG.apiKey,
-    };
-
-    console.log("💳 Enviando paymaster params:", paymasterParams);
-
-    const userOp = await builder.execute(contractAddress, 0, calldata, paymasterParams);
+    const userOp = await builder.execute(contractAddress, 0, calldata);
 
     console.log("UserOp gerada:", userOp);
     console.log("paymasterAndData final:", userOp.paymasterAndData);
