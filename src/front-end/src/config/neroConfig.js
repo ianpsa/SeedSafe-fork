@@ -17,4 +17,6 @@ export const NERO_CHAIN_CONFIG = {
     paymasterRpc: "https://paymaster-testnet.nerochain.io",
     apiKey: import.meta.env.VITE_PAYMASTER_API_KEY, // Vite-style .env
   };
+
+  console.log("🔑 API Key carregada:", import.meta.env.VITE_PAYMASTER_API_KEY);
   

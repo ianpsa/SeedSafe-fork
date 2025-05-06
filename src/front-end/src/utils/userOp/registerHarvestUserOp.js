@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import HarvestManagerAbi from "../../abi/abiHarvest.json";
 import { getUserOperationClient } from "./userOpClient";
 import { getSimpleAccountBuilder } from "./userOpBuilder";
-import { CONTRACT_ADDRESSES } from "../../config/neroConfig";
+import { CONTRACT_ADDRESSES, AA_PLATFORM_CONFIG } from "../../config/neroConfig";
 
 export const registerHarvestUserOp = async (
   signer,
@@ -22,16 +22,31 @@ export const registerHarvestUserOp = async (
       doc,
     ]);
 
-    const userOp = await builder.execute(contractAddress, 0, calldata);
+    const paymasterParams = {
+      type: 0,
+      rpc: AA_PLATFORM_CONFIG.paymasterRpc,
+      apikey: AA_PLATFORM_CONFIG.apiKey,
+    };
+
+    console.log("💳 Enviando paymaster params:", paymasterParams);
+
+    const userOp = await builder.execute(contractAddress, 0, calldata, paymasterParams);
+
+    console.log("UserOp gerada:", userOp);
+    console.log("paymasterAndData final:", userOp.paymasterAndData);
+
     const client = await getUserOperationClient();
     const res = await client.sendUserOperation(userOp);
 
-    console.log("✅ UserOperation enviada:", res.userOpHash);
+    console.log("UserOperation enviada:", res.userOpHash);
     return res.userOpHash;
   } catch (err) {
-    console.error("❌ Erro ao enviar UserOp:", err);
+    console.error("Erro ao enviar UserOp:", err);
     throw err;
   }
 };
+
+
+
 
 
