@@ -213,9 +213,9 @@ const Products = () => {
                 id={productId}
                 isActive={activeTab === productId}
               >
-                <div className="flex flex-row gap-8 items-center sm:flex-col md:flex-col">
+                <div className="flex flex-row gap-8 items-center ">
                   <motion.div
-                    className="md:w-2/5 min-w-[200px] order-2 md:order-1 py-5"
+                    className="md:w-2/5 min-w-[200px] order-1 md:order-1 py-5"
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}

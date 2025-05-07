@@ -7,7 +7,7 @@ import bgPattern from "../assets/bg-pattern.svg";
 const Hero = ({ openWalletModal, backgroundStyle }) => {
   return (
     <div
-      className="flex flex-row sm:flex-col justify-center items-center gap-12 px-8 py-12"
+      className="flex flex-row justify-center items-center gap-12 px-8 py-12"
       style={backgroundStyle}
     >
       <div className="flex-1 md:max-w-[600px]">
