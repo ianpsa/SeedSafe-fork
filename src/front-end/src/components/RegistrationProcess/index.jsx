@@ -5,12 +5,11 @@ import LoginForm from './LoginForm';
 import VerificationStatus from './VerificationStatus';
 import MarketplaceStatus from './MarketplaceStatus';
 import WalletConnect from '../WalletConnect';
-import { getSigner } from "../../utils/aaUtils";
-import { ethers } from "ethers";
-import { registerHarvestUserOp } from "../../utils/userOp/registerHarvestUserOp";
+import { useWeb3Auth } from '../Web3AuthContext';
+import { registerHarvestUserOp } from '../../utils/userOp/registerHarvestUserOp';
 
-
-const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
+const RegistrationProcess = ({ setCurrentPage }) => {
+  const { web3authProvider, userAddress, isLoggedIn } = useWeb3Auth();
   const [currentStep, setCurrentStep] = useState(1);
   const [showLogin, setShowLogin] = useState(false);
   const [loginData, setLoginData] = useState({
@@ -32,6 +31,9 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactionHash, setTransactionHash] = useState(null);
   const [registrationComplete, setRegistrationComplete] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState(null); // 'pending', 'approved', 'rejected'
+  const [salesProgress, setSalesProgress] = useState(0); // Percentage of crop sold
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Function to handle login form changes
   const handleLoginChange = (e) => {
@@ -45,46 +47,45 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   // Function to handle login submission
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    // In a real app, you'd validate credentials here
-    setIsLoggedIn(true);
+    // Simula login local (pode ser integrado com backend futuramente)
     setShowLogin(false);
   };
 
   // Function to handle form submission for step 1
   const handleStepOneSubmit = async (e) => {
     e.preventDefault();
-    
-    // Set processing state to true
-    setIsProcessing(true);
-  
+    if (!web3authProvider || !userAddress) {
+      alert('Conecte sua carteira Web3Auth para registrar a safra.');
+      return;
+    }
+    setIsSubmitting(true);
+
     try {
-      const signer = await getSigner();
-  
+      // Monta os dados para o UserOp
       const crop = formData.cropType;
       const quantity = parseInt(formData.quantity);
-      const price = 25;
+      const price = 25; // Valor fixo para exemplo
       const deliveryDate = Math.floor(new Date(formData.harvestDate).getTime() / 1000);
       const doc = formData.location || "doc://placeholder";
-  
-      const userOpHash = await registerHarvestUserOp(signer, {
+      // Envia UserOp via helper
+      const userOpHash = await registerHarvestUserOp(web3authProvider, {
         crop,
         quantity,
         price,
         deliveryDate,
         doc,
       });
-  
       console.log("✅ Safra registrada com UserOperation:", userOpHash);
-      
-      // Store the transaction hash and set registration as complete
       setTransactionHash(userOpHash);
       setRegistrationComplete(true);
       setIsProcessing(false);
-      
+      setShowLogin(true);
+
     } catch (err) {
       console.error("Erro ao registrar safra:", err);
       alert("Erro ao registrar safra:\n" + (err?.message || "sem mensagem"));
-      setIsProcessing(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -92,7 +93,7 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const handleNextStep = () => {
     setShowLogin(true);
   };
-  
+
   // Continue to verification after login
   useEffect(() => {
     if (isLoggedIn && showLogin === false && currentStep === 1) {
@@ -116,7 +117,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
       }, 2000);
     }
   };
-
 
   useEffect(() => {
     const testProvider = async () => {
@@ -148,7 +148,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     let updatedPractices = [...formData.sustainablePractices];
-
     if (checked) {
       updatedPractices.push(value);
     } else {
@@ -156,7 +155,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
         (practice) => practice !== value
       );
     }
-
     setFormData({
       ...formData,
       sustainablePractices: updatedPractices,
@@ -188,8 +186,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
-
-    
     <WalletConnect />
 
 
@@ -224,6 +220,8 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
             transactionHash={transactionHash}
             registrationComplete={registrationComplete}
             handleNextStep={handleNextStep}
+            isSubmitting={isSubmitting}
+
           />
         )}
 
@@ -248,3 +246,4 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
 };
 
 export default RegistrationProcess;
+
