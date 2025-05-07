@@ -249,7 +249,7 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-11/12 max-w-md p-6 transform transition-all scale-100 animate-fadeIn">
+      <div className="bg-white rounded-2xl shadow-xl w-11/12 max-w-md p-6 transform transition-all scale-100 animate-fadeIn relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -300,6 +300,7 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
             )}
           </button>
         </div>
+
 
         {error && (
           <div className="text-red-600 text-sm mt-4 p-3 bg-red-50 rounded-md border border-red-200">

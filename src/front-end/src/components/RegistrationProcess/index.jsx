@@ -4,7 +4,9 @@ import StepCircles from './StepCircles';
 import CropForm from './CropForm';
 import VerificationStatus from './VerificationStatus';
 import MarketplaceStatus from './MarketplaceStatus';
-
+import WalletConnect from '../WalletConnect';
+import { getSigner } from "../../utils/aaUtils";
+import { registerHarvestUserOp } from "../../utils/userOp/registerHarvestUserOp";
 // Import ABI and contract address
 import HarvestManagerABI from '../../abi/abiHarvest.json';
 const harvestManagerAddress = '0x0fC5025C764cE34df352757e82f7B5c4Df39A836';
@@ -134,6 +136,23 @@ const RegistrationProcess = ({ walletInfo }) => {
     }
   };
 
+  useEffect(() => {
+    const testProvider = async () => {
+      try {
+        const { JsonRpcProvider } = await import("ethers");
+
+        const provider = new ethers.providers.JsonRpcProvider("https://rpc-testnet.nerochain.io");
+
+        const network = await provider.getNetwork();
+        console.log("🔍 Resultado do getNetwork():", network);
+      } catch (err) {
+        console.error("❌ Erro ao testar a RPC da NERO:", err);
+      }
+    };
+  
+    testProvider();
+  }, []);
+
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -175,9 +194,12 @@ const RegistrationProcess = ({ walletInfo }) => {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 md:px-0">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center animate-fadeIn">
-        Register Your Crop
-      </h1>
+    
+    <WalletConnect />
+
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center animate-fadeIn">
+      Register Your Crop
+    </h1>
       <StepCircles currentStep={currentStep} registrationStatus={registrationStatus} />
       <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 border border-gray-100 animate-fadeIn mt-6">
         {!isProducer ? (
