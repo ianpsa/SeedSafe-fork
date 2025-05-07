@@ -20,7 +20,7 @@ import coinbaseIcon from "../assets/coinbase.svg";
 import walletconnectIcon from "../assets/walletconnect.svg"; // Add WalletConnect icon
 import neroIcon from "../assets/nero.svg"; // Add Nero icon for AA
 import { Loader2 } from "lucide-react";
-import { BsWallet2 } from "react-icons/bs";
+import { BsWallet2 } from 'react-icons/bs';
 
 
 // --- Configuration from .env --- 
