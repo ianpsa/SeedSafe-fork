@@ -5,6 +5,7 @@ import { ButtonTooltip } from "./ButtonToolTips"; // Import the ButtonTooltip co
 import bgPattern from "../assets/bg-pattern.svg";
 
 
+
 const Hero = ({ openWalletModal, backgroundStyle }) => {
   return (
     <div
