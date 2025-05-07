@@ -27,11 +27,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   });
   const [registrationStatus, setRegistrationStatus] = useState(null); // 'pending', 'approved', 'rejected'
   const [salesProgress, setSalesProgress] = useState(0); // Percentage of crop sold
-  
-  // New states for handling transaction processing
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [transactionHash, setTransactionHash] = useState(null);
-  const [registrationComplete, setRegistrationComplete] = useState(false);
 
   // Function to handle login form changes
   const handleLoginChange = (e) => {
@@ -53,9 +48,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   // Function to handle form submission for step 1
   const handleStepOneSubmit = async (e) => {
     e.preventDefault();
-    
-    // Set processing state to true
-    setIsProcessing(true);
   
     try {
       const signer = await getSigner();
@@ -75,25 +67,16 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
       });
   
       console.log("✅ Safra registrada com UserOperation:", userOpHash);
-      
-      // Store the transaction hash and set registration as complete
-      setTransactionHash(userOpHash);
-      setRegistrationComplete(true);
-      setIsProcessing(false);
-      
+      setShowLogin(true);
+  
     } catch (err) {
       console.error("Erro ao registrar safra:", err);
       alert("Erro ao registrar safra:\n" + (err?.message || "sem mensagem"));
-      setIsProcessing(false);
     }
   };
   
-  // Function to proceed to next step after registration is complete
-  const handleNextStep = () => {
-    setShowLogin(true);
-  };
   
-  // Continue to verification after login
+    // Continue to verification after login
   useEffect(() => {
     if (isLoggedIn && showLogin === false && currentStep === 1) {
       setCurrentStep(2);
@@ -220,10 +203,6 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
             handleInputChange={handleInputChange}
             handleCheckboxChange={handleCheckboxChange}
             handleStepOneSubmit={handleStepOneSubmit}
-            isProcessing={isProcessing}
-            transactionHash={transactionHash}
-            registrationComplete={registrationComplete}
-            handleNextStep={handleNextStep}
           />
         )}
 
