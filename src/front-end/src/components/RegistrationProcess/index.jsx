@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from "react";
-import StepCircles from "./StepCircles";
-import CropForm from "./CropForm";
-import LoginForm from "./LoginForm";
-import VerificationStatus from "./VerificationStatus";
-import MarketplaceStatus from "./MarketplaceStatus";
+import React, { useState, useEffect } from 'react';
+import StepCircles from './StepCircles';
+import CropForm from './CropForm';
+import LoginForm from './LoginForm';
+import VerificationStatus from './VerificationStatus';
+import MarketplaceStatus from './MarketplaceStatus';
+import WalletConnect from '../WalletConnect';
+import { getSigner } from "../../utils/aaUtils";
+import { ethers } from "ethers";
+import { registerHarvestUserOp } from "../../utils/userOp/registerHarvestUserOp";
+
 
 const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -41,15 +46,37 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
   };
 
   // Function to handle form submission for step 1
-  const handleStepOneSubmit = (e) => {
+  const handleStepOneSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you'd validate the form here
-
-    // Show login form after submission
-    setShowLogin(true);
+  
+    try {
+      const signer = await getSigner();
+  
+      const crop = formData.cropType;
+      const quantity = parseInt(formData.quantity);
+      const price = 25;
+      const deliveryDate = Math.floor(new Date(formData.harvestDate).getTime() / 1000);
+      const doc = formData.location || "doc://placeholder";
+  
+      const userOpHash = await registerHarvestUserOp(signer, {
+        crop,
+        quantity,
+        price,
+        deliveryDate,
+        doc,
+      });
+  
+      console.log("✅ Safra registrada com UserOperation:", userOpHash);
+      setShowLogin(true);
+  
+    } catch (err) {
+      console.error("Erro ao registrar safra:", err);
+      alert("Erro ao registrar safra:\n" + (err?.message || "sem mensagem"));
+    }
   };
-
-  // Continue to verification after login
+  
+  
+    // Continue to verification after login
   useEffect(() => {
     if (isLoggedIn && showLogin === false && currentStep === 1) {
       setCurrentStep(2);
@@ -73,6 +100,24 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
     }
   };
 
+
+  useEffect(() => {
+    const testProvider = async () => {
+      try {
+        const { JsonRpcProvider } = await import("ethers");
+
+        const provider = new ethers.providers.JsonRpcProvider("https://rpc-testnet.nerochain.io");
+
+        const network = await provider.getNetwork();
+        console.log("🔍 Resultado do getNetwork():", network);
+      } catch (err) {
+        console.error("❌ Erro ao testar a RPC da NERO:", err);
+      }
+    };
+  
+    testProvider();
+  }, []);
+  
   // This would be called by the form to handle changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -126,6 +171,11 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn }) => {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
+
+    
+    <WalletConnect />
+
+
       {/* Step Progress Circles */}
       <div className="bg-white rounded-lg shadow-lg mb-5 pt-4 border border-gray-100 animate-fadeIn">
         <h1 className="text-2xl md:text-3xl font-bold text-black text-center animate-fadeIn">
