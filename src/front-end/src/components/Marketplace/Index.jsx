@@ -169,7 +169,7 @@ const Marketplace = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 bg-slate-100 min-h-screen">
+    <div className="bg-white rounded-lg shadow-lg mb-5 pt-4 border border-gray-100 animate-fadeIn max-w-7xl mx-auto py-8 px-4 bg-slate-100 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-slate-800 flex items-center">
           <Leaf className="mr-2 h-8 w-8 text-green-600" />

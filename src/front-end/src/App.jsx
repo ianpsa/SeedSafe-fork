@@ -152,12 +152,14 @@ function App() {
     setShowOnboarding(true);
   };
 
-  const backgroundStyle = !isMobile ? {
-    backgroundImage: `url(${bgPattern})`,
-    backgroundSize: "auto",
-    backgroundPosition: "center",
-  } : {};
-
+  const backgroundStyle = !isMobile
+  ? {
+      backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.25)), url(${bgPattern})`,
+      backgroundSize: "auto",
+      backgroundPosition: "center",
+    }
+  : {};
+  
   return (
     <Router>
       <div className="font-poppins text-slate-800 overflow-x-hidden max-w-screen">
@@ -169,12 +171,7 @@ function App() {
             isMobile
               ? "bg-gradient-to-r from-white/95 to-white/90"
               : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
-          } pb-12 md:pb-24 relative`}
-          style={{
-            backgroundImage: isMobile ? "none" : `url(${bgPattern})`,
-            backgroundSize: "auto",
-            backgroundPosition: "center",
-          }}
+          } relative`}
         >
           <Navbar
             openWalletModal={openWalletModal}
@@ -185,10 +182,7 @@ function App() {
 
           {/* Renderizar Hero apenas na página inicial */}
           <Routes>
-            <Route
-              path="/"
-              element={<Hero openWalletModal={openWalletModal} />}
-            />
+            <Route path="/" />
           </Routes>
         </header>
 
@@ -198,6 +192,7 @@ function App() {
               path="/"
               element={
                 <>
+                  <Hero backgroundStyle={backgroundStyle} openWalletModal={openWalletModal} />
                   <HowItWorks />
                   <Benefits />
                   <Products />
@@ -216,7 +211,7 @@ function App() {
                     isMobile
                       ? "bg-gradient-to-r from-white/95 to-white/90"
                       : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
-                  }`}
+                  } py-10`}
                   style={backgroundStyle}
                 >
                   <Marketplace />
@@ -233,21 +228,35 @@ function App() {
             <Route
               path="/register"
               element={
-                <RegistrationProcess
-                  setCurrentPage={setCurrentPage}
-                  isLoggedIn={isLoggedIn}
-                  setIsLoggedIn={setIsLoggedIn}
-                />
+                <div
+                  className={`${
+                    isMobile
+                      ? "bg-gradient-to-r from-white/95 to-white/90"
+                      : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
+                  } py-10`}
+                  style={backgroundStyle}
+                >
+                  <RegistrationProcess
+                    setCurrentPage={setCurrentPage}
+                    isLoggedIn={isLoggedIn}
+                    setIsLoggedIn={setIsLoggedIn}
+                  />
+                </div>
               }
             />
             <Route
               path="/auditor"
               element={
-                isLoggedIn && userRole === "auditor" ? (
+                <div
+                  className={`${
+                    isMobile
+                      ? "bg-gradient-to-r from-white/95 to-white/90"
+                      : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
+                  } py-10`}
+                  style={backgroundStyle}
+                >
                   <Auditor />
-                ) : (
-                  <Navigate to="/" replace />
-                )
+                </div>
               }
             />
           </Routes>

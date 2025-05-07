@@ -2,10 +2,15 @@
 import { Link } from "react-router-dom";
 import heroImage from "../assets/DesignToken.png"; // Ajuste o caminho conforme necessário
 import { ButtonTooltip } from "./ButtonTooltips"; // Import the ButtonTooltip component
+import bgPattern from "../assets/bg-pattern.svg";
 
-const Hero = ({ openWalletModal }) => {
+
+const Hero = ({ openWalletModal, backgroundStyle }) => {
   return (
-    <div className="flex md:flex-row justify-center items-center gap-12 px-8 py-12">
+    <div
+      className="sm:flex-col lg:flex flex-row justify-center items-center gap-12 px-8 py-12"
+      style={backgroundStyle}
+    >
       <div className="flex-1 md:max-w-[600px]">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
           Tokenize your harvest, <br />
@@ -36,22 +41,8 @@ const Hero = ({ openWalletModal }) => {
             </Link>
           </ButtonTooltip>
         </div>
-        <div className="flex flex-wrap gap-8">
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-green-800">120+</span>
-            <span className="text-sm text-gray-600">Active Producers</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-green-800">X NERO</span>
-            <span className="text-sm text-gray-600">Captured in 2025</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-green-800">5.8K</span>
-            <span className="text-sm text-gray-600">TCO₂ tokenized</span>
-          </div>
-        </div>
       </div>
-      <div className="flex justify-center items-center">
+      <div className="py-12 flex justify-center items-center">
         <img
           src={heroImage || "/placeholder.svg"}
           alt="Agricultura tokenizada sustentável"
