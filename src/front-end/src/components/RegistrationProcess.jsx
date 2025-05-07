@@ -13,6 +13,7 @@ import { getAAWalletAddress, isAAWalletDeployed } from '../utils/aaUtils';
 import { useWeb3Auth } from "./Web3AuthContext";
 import { getUserOperationClient } from '../utils/userOp/userOpClient';
 import { getSimpleAccountBuilder } from '../utils/userOp/userOpBuilder';
+import { AA_PLATFORM_CONFIG } from "../config/neroConfig";
 
 // NERO Chain Contract address
 const HARVEST_MANAGER_ADDRESS = '0x0fC5025C764cE34df352757e82f7B5c4Df39A836';
@@ -168,7 +169,7 @@ const RegistrationProcess = ({ setCurrentPage }) => {
       console.log("Preço convertido para unidades de token:", priceInTokens);
       
       // Criar string de documentação
-      const documentation = `Produtor: ${web3authProvider}, ` +
+      const documentation = `Produtor: ${userAddress}, ` +
                            `Localização: ${dataToProcess.location}, ` +
                            `Área: ${dataToProcess.area}ha, ` +
                            `Práticas: ${dataToProcess.sustainablePractices.join(',')}`;
@@ -198,13 +199,19 @@ const RegistrationProcess = ({ setCurrentPage }) => {
       
       setTxStatus('pending');
       
-      // Criar e executar a transação usando o SDK NERO AA
-      let userOpHash;
-      
+      // Criar e executar a transação usando o SDK NERO AA com Paymaster
       try {
         const client = await getUserOperationClient();
-        const builder = await getSimpleAccountBuilder(simpleAccount.signer || simpleAccount);
+        const builder = await getSimpleAccountBuilder(simpleAccount);
+        // Configurar paymaster para patrocinar o gás
+        builder.setPaymasterOptions({
+          type: 0,
+          apikey: AA_PLATFORM_CONFIG.apiKey,
+          rpc: AA_PLATFORM_CONFIG.paymasterRpc,
+          paymasterAddress: AA_PLATFORM_CONFIG.paymasterAddress,
+        });
         const userOp = await builder.execute(HARVEST_MANAGER_ADDRESS, 0, callData);
+        console.log("UserOperation enviada:", userOp.userOpHash || userOp.hash);
         const res = await client.sendUserOperation(userOp);
         console.log("UserOperation enviada:", res.userOpHash);
         const receipt = await res.wait();
