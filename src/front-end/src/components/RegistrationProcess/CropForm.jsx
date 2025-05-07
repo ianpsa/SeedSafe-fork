@@ -8,9 +8,7 @@ import {
   Sprout, 
   Recycle, 
   Wind,
-  Info,
-  DollarSign,
-  FileText 
+  Info
 } from 'lucide-react';
 
 const SustainablePracticeCard = ({ id, title, description, icon: Icon, isSelected, onChange }) => {
@@ -40,25 +38,29 @@ const SustainablePracticeCard = ({ id, title, description, icon: Icon, isSelecte
   );
 };
 
-// Component for the Crop Registration Form
-const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleStepOneSubmit, isSubmitting }) => {
+const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleStepOneSubmit }) => {
+  // Map to track which cards are selected
   const [selectedPractices, setSelectedPractices] = useState(
     formData.sustainablePractices || []
   );
+  
+  // Form validation state
   const [dateError, setDateError] = useState('');
   const [areaError, setAreaError] = useState('');
-  const [priceError, setPriceError] = useState('');
-  const [quantityError, setQuantityError] = useState('');
-
-  // Handle selection of sustainable practice cards
+  
+  // Handle card selection
   const handlePracticeSelection = (practiceId, isSelected) => {
     let updatedPractices = [...selectedPractices];
+    
     if (isSelected) {
       updatedPractices.push(practiceId);
     } else {
       updatedPractices = updatedPractices.filter(id => id !== practiceId);
     }
+    
     setSelectedPractices(updatedPractices);
+    
+    // Update the form data via the parent component's handler
     const mockEvent = {
       target: {
         name: 'sustainablePractices',
@@ -68,141 +70,69 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
     };
     handleCheckboxChange(mockEvent);
   };
-
-  // Validate harvest date (must be in the future)
+  
+  // Validate harvest date is in the future
   const validateDate = (e) => {
     const selectedDate = new Date(e.target.value);
     const today = new Date();
+    
+    // Clear hours, minutes, seconds for comparison
     today.setHours(0, 0, 0, 0);
+    
     if (selectedDate < today) {
-      setDateError('The harvest date must be in the future');
+      setDateError('Harvest date must be in the future');
     } else {
       setDateError('');
     }
+    
+    // Still update the form data
     handleInputChange(e);
   };
-
-  // Validate farm area (must be positive)
+  
+  // Validate farm area is a positive number
   const validateArea = (e) => {
     const area = parseFloat(e.target.value);
+    
     if (isNaN(area) || area <= 0) {
-      setAreaError('The farm area must be a positive number');
+      setAreaError('Farm area must be a positive number');
     } else {
       setAreaError('');
     }
+    
+    // Still update the form data
     handleInputChange(e);
   };
-
-  // Validate price (must be positive)
-  const validatePrice = (e) => {
-    const price = parseFloat(e.target.value);
-    if (isNaN(price) || price <= 0) {
-      setPriceError('Price must be a positive number');
-    } else {
-      setPriceError('');
-    }
-    handleInputChange(e);
-  };
-
-  // Validate quantity (must be positive integer)
-  const validateQuantity = (e) => {
-    const quantity = parseInt(e.target.value, 10);
-    if (isNaN(quantity) || quantity <= 0 || !Number.isInteger(Number(e.target.value))) {
-      setQuantityError('Quantity must be a positive whole number');
-    } else {
-      setQuantityError('');
-    }
-    handleInputChange(e);
-  };
-
-  // Handle form submission, including validation checks
+  
+  // Override submit to check validation
   const onSubmit = (e) => {
     e.preventDefault();
     
-    // Log formData for diagnostic
-    console.log("Form submission. FormData:", formData);
-    
-    // Validation checks
-    let hasError = false;
-    
-    if (!formData.harvestDate) {
-      setDateError('Harvest date is required');
-      hasError = true;
+    // Check validation errors before submitting
+    if (dateError || areaError) {
+      return;
     }
     
-    if (!formData.area || parseFloat(formData.area) <= 0) {
-      setAreaError('Farm area must be a positive number');
-      hasError = true;
-    }
-    
-    // Use 'pricePerUnitUSD' for validation check
-    if (!formData.pricePerUnitUSD || parseFloat(formData.pricePerUnitUSD) <= 0) {
-      setPriceError('Price must be a positive number');
-      hasError = true;
-    }
-    
-    if (!formData.quantity || parseInt(formData.quantity, 10) <= 0) {
-      setQuantityError('Quantity must be a positive whole number');
-      hasError = true;
-    }
-    
-    if (!formData.cropType) {
-      console.error("Missing cropType");
-      hasError = true;
-    }
-    
-    if (!formData.location) {
-      console.error("Missing location");
-      hasError = true;
-    }
-
-    if (hasError) {
-      console.error("Validation errors:", { 
-        dateError, 
-        areaError, 
-        priceError, 
-        quantityError,
-        cropType: !formData.cropType,
-        location: !formData.location
-      });
-      return; 
-    }
-    
-    try {
-      // Log we're about to call handleStepOneSubmit
-      console.log("Calling handleStepOneSubmit with valid data");
-      
-      // Ensure the price is a string (to avoid issues with parseUnits)
-      const dataToSubmit = {
-        ...formData,
-        pricePerUnitUSD: formData.pricePerUnitUSD.toString()
-      };
-      
-      // Call the submission function with validated data
-      handleStepOneSubmit(e, dataToSubmit);
-    } catch (error) {
-      console.error("Error during form submission:", error);
-    }
+    handleStepOneSubmit(e);
   };
-
-  // Define sustainable practices
+  
+  // List of sustainable practices with descriptions
   const sustainablePractices = [
     {
       id: 'organic',
-      title: 'Organic Agriculture',
-      description: 'No pesticides or synthetic fertilizers, increasing carbon sequestration',
+      title: 'Organic Farming',
+      description: 'No synthetic pesticides or fertilizers, increasing carbon sequestration',
       icon: Sprout
     },
     {
       id: 'conservation',
-      title: 'Direct Planting',
-      description: 'Minimal soil disturbance, preserving carbon and reducing emissions',
+      title: 'Conservation Tillage',
+      description: 'Minimal soil disturbance, preserving soil carbon and reducing emissions',
       icon: Recycle
     },
     {
       id: 'rotation',
       title: 'Crop Rotation',
-      description: 'Different planting cycles that improve soil health and carbon storage',
+      description: 'Diverse planting cycles that enhance soil health and carbon storage',
       icon: Wind
     },
     {
@@ -212,13 +142,13 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
       icon: Droplets
     }
   ];
-
+  
   return (
     <div className="animate-fadeIn">
       <h2 className="text-xl font-semibold text-green-800 mb-4">Crop Details</h2>
       <div className="bg-green-50 rounded-lg p-4 mb-6 border border-green-100">
         <p className="text-green-700 text-sm">
-          <span className="font-semibold">Combo of Tokens:</span> For each crop token, you will receive a Carbon Credit token based on your sustainable practices. These tokens form a Combo NFT that can be traded on our marketplace.
+          <span className="font-semibold">Token Combo:</span> For each crop token, you'll receive a Carbon Credit token based on your sustainable practices. These tokens form an NFT Combo that can be traded in our marketplace.
         </p>
       </div>
       
@@ -235,12 +165,12 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
               required
             >
-              <option value="">Selecione o tipo de safra</option>
-              <option value="Café">Café</option>
-              <option value="Soja">Soja</option>
-              <option value="Milho">Milho</option>
-              <option value="Trigo">Trigo</option>
-              <option value="Arroz">Arroz</option>
+              <option value="">Select crop type</option>
+              <option value="Coffee">Coffee</option>
+              <option value="Soybean">Soybean</option>
+              <option value="Corn">Corn</option>
+              <option value="Wheat">Wheat</option>
+              <option value="Rice">Rice</option>
             </select>
           </div>
           
@@ -252,12 +182,11 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               type="number"
               name="quantity"
               value={formData.quantity}
-              onChange={validateQuantity}
-              className={`w-full p-2 bg-white text-gray-800 border ${quantityError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-              placeholder="ex: 1000"
+              onChange={handleInputChange}
+              className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="e.g. 1000"
               required
             />
-            {quantityError && <p className="text-red-500 text-xs mt-1">{quantityError}</p>}
           </div>
           
           <div>
@@ -271,7 +200,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               value={formData.area}
               onChange={validateArea}
               className={`w-full p-2 bg-white text-gray-800 border ${areaError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-              placeholder="ex: 5.5"
+              placeholder="e.g. 5.5"
               step="0.1"
               min="0.1"
               required
@@ -280,14 +209,14 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               <p className="text-red-500 text-xs mt-1">{areaError}</p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              This information is required to calculate the carbon credits
+              This information is needed to calculate carbon credits
             </p>
           </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               <Calendar className="h-4 w-4 inline mr-1 text-green-600" />
-              Harvest Date
+              Expected Harvest Date
             </label>
             <input 
               type="date"
@@ -313,7 +242,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               value={formData.location}
               onChange={handleInputChange}
               className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              placeholder="Cidade, Estado"
+              placeholder="City, State"
               required
             />
           </div>
@@ -324,7 +253,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               Sustainable Practices (Select all that apply)
             </label>
             <p className="text-xs text-gray-500 mb-3">
-              Each practice increases your carbon credit allocation and improves the value of your NFT.
+              Each practice increases your carbon credit allocation and improves your NFT value.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {sustainablePractices.map(practice => (
@@ -344,25 +273,11 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
           <div className="pt-4">
             <button 
               type="submit"
-              className={`w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-md font-medium transition duration-300 flex items-center justify-center ${
-                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              disabled={isSubmitting || !!dateError || !!areaError || !!priceError || !!quantityError}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-md font-medium transition duration-300 flex items-center justify-center"
+              disabled={!!dateError || !!areaError}
             >
-              {isSubmitting ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  Register Crop
-                  <ArrowRight className="ml-2 h-5 w-5 animate-pulse" />
-                </>
-              )}
+              Register Crop
+              <ArrowRight className="ml-2 h-5 w-5 animate-pulse" />
             </button>
           </div>
         </div>

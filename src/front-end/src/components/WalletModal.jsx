@@ -13,6 +13,7 @@ import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { parseToTokenUnits, formatFromTokenUnits, isValidEthereumAddress } from '../utils/ethersHelpers';
 import { getAAWalletAddress, isAAWalletDeployed } from '../utils/aaUtils';
+import { useWeb3Auth } from "./Web3AuthContext";
 
 import metamaskIcon from "../assets/metamask.svg";
 import coinbaseIcon from "../assets/coinbase.svg";
@@ -50,6 +51,7 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
   const [connecting, setConnecting] = useState(null); // Store the type of connection being attempted
   const [web3authInstance, setWeb3authInstance] = useState(null);
   const { openConnectModal } = useConnectModal(); // Hook from RainbowKit
+  const { login: loginWeb3AuthContext } = useWeb3Auth();
 
   // Initialize Web3Auth
   useEffect(() => {
@@ -255,6 +257,8 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
         rpcUrl,
         accountOptions
       );
+
+      await loginWeb3AuthContext(web3authProvider, aaAddress);
 
       if (onLogin) {
         onLogin("producer", {

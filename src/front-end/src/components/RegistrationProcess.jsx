@@ -10,11 +10,15 @@ import { isValidEthereumAddress } from "../utils/ethersHelpers";
 import { CheckCircle, Loader2, AlertCircle, Info } from 'lucide-react';
 import { parseToTokenUnits, formatFromTokenUnits } from '../utils/ethersHelpers';
 import { getAAWalletAddress, isAAWalletDeployed } from '../utils/aaUtils';
+import { useWeb3Auth } from "./Web3AuthContext";
+import { getUserOperationClient } from '../utils/userOp/userOpClient';
+import { getSimpleAccountBuilder } from '../utils/userOp/userOpBuilder';
 
 // NERO Chain Contract address
 const HARVEST_MANAGER_ADDRESS = '0x0fC5025C764cE34df352757e82f7B5c4Df39A836';
 
-const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn, web3authProvider }) => {
+const RegistrationProcess = ({ setCurrentPage }) => {
+  const { web3authProvider, userAddress, isLoggedIn } = useWeb3Auth();
   const [currentStep, setCurrentStep] = useState(1);
   const [showLogin, setShowLogin] = useState(false);
   const [loginData, setLoginData] = useState({
@@ -198,48 +202,21 @@ const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn, web3au
       let userOpHash;
       
       try {
-        if (typeof simpleAccount.execute === 'function') {
-          userOpHash = await simpleAccount.execute(
-            HARVEST_MANAGER_ADDRESS,
-            0,
-            callData
-          );
-        } else if (typeof simpleAccount.createUnsignedUserOp === 'function' && 
-                   typeof simpleAccount.sendUserOp === 'function') {
-          const userOp = await simpleAccount.createUnsignedUserOp({
-            target: HARVEST_MANAGER_ADDRESS,
-            data: callData,
-            value: 0
-          });
-          userOpHash = await simpleAccount.sendUserOp(userOp);
-        } else {
-          throw new Error("Método de execução não suportado pelo SDK NERO AA");
-        }
-        
-        console.log("Transação enviada para NERO Chain:", userOpHash);
-        setTxHash(userOpHash?.hash || userOpHash?.transactionHash || userOpHash);
-        
-        if (userOpHash && typeof userOpHash.wait === 'function') {
-          console.log("Aguardando confirmação da transação...");
-          const receipt = await userOpHash.wait();
-          console.log("Transação confirmada na NERO Chain:", receipt);
-          
-          setTxStatus('confirmed');
-          setRegistrationStatus({
-            success: true,
-            cropId: receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
-            timestamp: new Date().toISOString(),
-            transactionHash: receipt?.transactionHash || userOpHash?.hash || userOpHash
-          });
-        } else {
-          setTxStatus('confirmed');
-          setRegistrationStatus({
-            success: true,
-            cropId: Math.floor(Math.random() * 1000).toString(),
-            timestamp: new Date().toISOString(),
-            transactionHash: userOpHash?.hash || userOpHash
-          });
-        }
+        const client = await getUserOperationClient();
+        const builder = await getSimpleAccountBuilder(simpleAccount.signer || simpleAccount);
+        const userOp = await builder.execute(HARVEST_MANAGER_ADDRESS, 0, callData);
+        const res = await client.sendUserOperation(userOp);
+        console.log("UserOperation enviada:", res.userOpHash);
+        const receipt = await res.wait();
+        console.log("Receipt:", receipt.transactionHash);
+        setTxHash(receipt.transactionHash);
+        setTxStatus('confirmed');
+        setRegistrationStatus({
+          success: true,
+          cropId: receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
+          timestamp: new Date().toISOString(),
+          transactionHash: receipt?.transactionHash
+        });
       } catch (txError) {
         console.error("Erro na execução da transação:", txError);
         throw new Error(`Falha na execução da transação: ${txError.message}`);

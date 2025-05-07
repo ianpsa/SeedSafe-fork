@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -8,6 +9,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useAccount, useDisconnect } from 'wagmi';
+import { Web3AuthProvider } from './components/Web3AuthContext';
 
 // Importação direta dos assets
 import bgPattern from "./assets/bg-pattern.svg";
@@ -122,111 +124,113 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="font-poppins text-slate-800 overflow-x-hidden max-w-screen">
-        <header
-          className={`${
-            isMobile
-              ? "bg-gradient-to-r from-white/95 to-white/90"
-              : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
-          } pb-12 md:pb-24 relative`}
-          style={{
-            backgroundImage: isMobile ? "none" : `url(${bgPattern})`,
-            backgroundSize: "auto",
-            backgroundPosition: "center",
-          }}
-        >
-          <Navbar
-            openWalletModal={openWalletModal}
-            isLoggedIn={isLoggedIn}
-            userRole={userRole}
-            userAddress={walletInfo?.address}
-            onLogout={handleLogout}
-          />
+    <Web3AuthProvider>
+      <Router>
+        <div className="font-poppins text-slate-800 overflow-x-hidden max-w-screen">
+          <header
+            className={`${
+              isMobile
+                ? "bg-gradient-to-r from-white/95 to-white/90"
+                : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
+            } pb-12 md:pb-24 relative`}
+            style={{
+              backgroundImage: isMobile ? "none" : `url(${bgPattern})`,
+              backgroundSize: "auto",
+              backgroundPosition: "center",
+            }}
+          >
+            <Navbar
+              openWalletModal={openWalletModal}
+              isLoggedIn={isLoggedIn}
+              userRole={userRole}
+              userAddress={walletInfo?.address}
+              onLogout={handleLogout}
+            />
 
-          {/* Renderizar Hero apenas na página inicial */}
-          <Routes>
-            <Route
-              path="/"
-              element={<Hero openWalletModal={openWalletModal} />}
-            />
-          </Routes>
-        </header>
+            {/* Renderizar Hero apenas na página inicial */}
+            <Routes>
+              <Route
+                path="/"
+                element={<Hero openWalletModal={openWalletModal} />}
+              />
+            </Routes>
+          </header>
 
-        <main className="w-full">
-          <Routes>
-            {/* Home page */}
-            <Route
-              path="/"
-              element={
-                <>
-                  <HowItWorks />
-                  <Benefits />
-                  <Products />
-                  <Testimonials />
-                  <CTASection openWalletModal={openWalletModal} />
-                </>
-              }
-            />
-            
-            {/* Marketplace - accessible to all */}
-            <Route
-              path="/marketplace"
-              element={
-                <div
-                  className={`${
-                    isMobile
-                      ? "bg-gradient-to-r from-white/95 to-white/90"
-                      : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
-                  }`}
-                  style={backgroundStyle}
-                >
-                  <Marketplace walletInfo={walletInfo} />
-                </div>
-              }
-            />
-            
-            {/* Crop Registration - only for producers */}
-            <Route
-              path="/register"
-              element={
-                <RequireAuth requiredRole="producer">
-                  <div className="bg-white">
-                    <RegistrationProcess walletInfo={walletInfo} />
+          <main className="w-full">
+            <Routes>
+              {/* Home page */}
+              <Route
+                path="/"
+                element={
+                  <>
+                    <HowItWorks />
+                    <Benefits />
+                    <Products />
+                    <Testimonials />
+                    <CTASection openWalletModal={openWalletModal} />
+                  </>
+                }
+              />
+              
+              {/* Marketplace - accessible to all */}
+              <Route
+                path="/marketplace"
+                element={
+                  <div
+                    className={`${
+                      isMobile
+                        ? "bg-gradient-to-r from-white/95 to-white/90"
+                        : "bg-gradient-to-r from-white/95 to-white/80 bg-cover"
+                    }`}
+                    style={backgroundStyle}
+                  >
+                    <Marketplace walletInfo={walletInfo} />
                   </div>
-                </RequireAuth>
-              }
+                }
+              />
+              
+              {/* Crop Registration - only for producers */}
+              <Route
+                path="/register"
+                element={
+                  <RequireAuth requiredRole="producer">
+                    <div className="bg-white">
+                      <RegistrationProcess walletInfo={walletInfo} />
+                    </div>
+                  </RequireAuth>
+                }
+              />
+              
+              {/* Auditor Panel - only for auditors */}
+              <Route
+                path="/auditor"
+                element={
+                  <RequireAuth requiredRole="auditor">
+                    <Auditor walletInfo={walletInfo} />
+                  </RequireAuth>
+                }
+              />
+              
+              {/* Fallback for unknown routes */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+
+          <Footer />
+
+          {/* Modal de Carteira */}
+          {isWalletModalOpen && (
+            <WalletModal
+              isOpen={isWalletModalOpen}
+              onClose={closeWalletModal}
+              onLogin={handleLogin}
             />
-            
-            {/* Auditor Panel - only for auditors */}
-            <Route
-              path="/auditor"
-              element={
-                <RequireAuth requiredRole="auditor">
-                  <Auditor walletInfo={walletInfo} />
-                </RequireAuth>
-              }
-            />
-            
-            {/* Fallback for unknown routes */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
+          )}
 
-        <Footer />
-
-        {/* Modal de Carteira */}
-        {isWalletModalOpen && (
-          <WalletModal
-            isOpen={isWalletModalOpen}
-            onClose={closeWalletModal}
-            onLogin={handleLogin}
-          />
-        )}
-
-        <ChatbotWidget />
-      </div>
-    </Router>
+          <ChatbotWidget />
+        </div>
+      </Router>
+    </Web3AuthProvider>
   );
 }
 
