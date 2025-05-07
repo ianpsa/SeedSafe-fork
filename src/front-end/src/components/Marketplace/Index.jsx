@@ -14,6 +14,9 @@ import FiltersPanel from "./FiltersPanel";
 import CropCard from "./CropCard";
 import PurchaseModal from "./PurchaseModal";
 import { mockListings } from "./mockData";
+import MarketplaceOnboarding from "./MarketplaceOnboarding";
+import BlockchainSecurityInfo from "./BlockchainSecurityInfo";
+import MarketplaceHowItWorksButton from "./HowItWorksButton"; // Import the new button component
 
 // Define the RefreshCw component once, at the top
 const RefreshCw = (props) => {
@@ -53,6 +56,9 @@ const Marketplace = () => {
     harvestDateBefore: null,
     cropTypes: [],
   });
+  
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Load mock data with a simulated delay to show loading state
   useEffect(() => {
@@ -63,6 +69,17 @@ const Marketplace = () => {
       setIsLoading(false);
     }, 800);
   }, []);
+  
+  // Handler for the "How It Works" button
+  const handleHowItWorksClick = () => {
+    // Mostrar o onboarding independentemente de ter sido concluído antes
+    setShowOnboarding(true);
+  };
+  
+  // Handle onboarding completion
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
 
   // Apply filters and search
   useEffect(() => {
@@ -167,6 +184,9 @@ const Marketplace = () => {
         </Link>
       </div>
 
+      {/* Blockchain Security Information */}
+      <BlockchainSecurityInfo />
+
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300 hover:shadow-xl">
         <div className="flex items-start gap-2">
           <Info className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
@@ -179,7 +199,7 @@ const Marketplace = () => {
 
         {/* Search and Filter Bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-grow relative">
+          <div className="flex-grow relative search-bar">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
             </div>
@@ -245,7 +265,7 @@ const Marketplace = () => {
       ) : (
         <>
           {/* Listings Grid - Using the grid-cards class from your CSS */}
-          <div className="grid md:grid-cols-3  sm:grid-cols-1 gap-6">
+          <div className="grid md:grid-cols-3 sm:grid-cols-1 gap-6">
             {filteredListings.map((listing, index) => (
               <div
                 key={listing.id}
@@ -279,7 +299,17 @@ const Marketplace = () => {
           onConfirm={handlePurchaseConfirm}
         />
       )}
+      
+      {/* Onboarding Component */}
+      <MarketplaceOnboarding 
+        isOpen={showOnboarding} 
+        onComplete={handleOnboardingComplete} 
+      />
+      
+      {/* Marketplace How It Works Button - positioned above the general onboarding button */}
+      <MarketplaceHowItWorksButton onClick={handleHowItWorksClick} />
 
+      {/* CSS Styles */}
       <style jsx global>{`
         @keyframes fadeIn {
           from {
