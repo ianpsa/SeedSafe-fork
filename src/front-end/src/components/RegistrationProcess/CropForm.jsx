@@ -11,7 +11,10 @@ import {
   Info,
   HelpCircle,
   Lock,
-  Shield
+  Shield,
+  Loader,
+  CheckCircle,
+  ExternalLink
 } from 'lucide-react';
 import SecurityInfoCard from './SecurityInfoCard';
 
@@ -81,7 +84,16 @@ const SustainablePracticeCard = ({ id, title, description, icon: Icon, isSelecte
   );
 };
 
-const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleStepOneSubmit }) => {
+const CropForm = ({ 
+  formData, 
+  handleInputChange, 
+  handleCheckboxChange, 
+  handleStepOneSubmit,
+  isProcessing,
+  transactionHash,
+  registrationComplete,
+  handleNextStep
+}) => {
   // Map to track which cards are selected
   const [selectedPractices, setSelectedPractices] = useState(
     formData.sustainablePractices || []
@@ -155,7 +167,19 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
       return;
     }
     
+    // If registration is complete and user clicks "Next Step"
+    if (registrationComplete) {
+      handleNextStep();
+      return;
+    }
+    
     handleStepOneSubmit(e);
+  };
+  
+  // Function to display a shortened version of the transaction hash
+  const shortenHash = (hash) => {
+    if (!hash) return '';
+    return `${hash.substring(0, 6)}...${hash.substring(hash.length - 4)}`;
   };
   
   // List of sustainable practices with descriptions
@@ -233,6 +257,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               onChange={handleInputChange}
               className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
               required
+              disabled={isProcessing || registrationComplete}
             >
               <option value="">Select crop type</option>
               <option value="Coffee">Coffee</option>
@@ -263,6 +288,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="e.g. 1000"
               required
+              disabled={isProcessing || registrationComplete}
             />
             <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
               <Shield className="h-3 w-3 text-green-600" />
@@ -293,6 +319,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               step="0.1"
               min="0.1"
               required
+              disabled={isProcessing || registrationComplete}
             />
             {areaError && (
               <p className="text-red-500 text-xs mt-1">{areaError}</p>
@@ -322,6 +349,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               onChange={validateDate}
               className={`w-full p-2 bg-white text-gray-800 border ${dateError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500`}
               required
+              disabled={isProcessing || registrationComplete}
             />
             {dateError && (
               <p className="text-red-500 text-xs mt-1">{dateError}</p>
@@ -353,6 +381,7 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
               className="w-full p-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="City, State"
               required
+              disabled={isProcessing || registrationComplete}
             />
           </div>
           
@@ -382,24 +411,78 @@ const CropForm = ({ formData, handleInputChange, handleCheckboxChange, handleSte
                   icon={practice.icon}
                   isSelected={selectedPractices.includes(practice.id)}
                   onChange={handlePracticeSelection}
+                  disabled={isProcessing || registrationComplete}
                 />
               ))}
             </div>
           </div>
           
           <div className="pt-4">
+            {/* Transaction hash display */}
+            {transactionHash && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <div className="flex items-start space-x-2">
+                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <p className="text-green-700 font-medium">Registration Successful!</p>
+                    <div className="mt-1 flex items-center text-sm text-green-600">
+                      <span className="font-medium mr-1">Transaction:</span>
+                      <code className="bg-green-100 px-2 py-0.5 rounded">{shortenHash(transactionHash)}</code>
+                      <Tooltip content="View transaction on NERO Chain Explorer">
+                        <ExternalLink 
+                          className="h-4 w-4 ml-1 text-green-600 cursor-pointer" 
+                          onClick={() => window.open(`https://explorer.nerochain.io/tx/${transactionHash}`, '_blank')}
+                        />
+                      </Tooltip>
+                    </div>
+                    <p className="text-xs text-green-600 mt-1">Your crop has been registered on the blockchain. Click Next Step to continue.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <button 
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-md font-medium transition duration-300 flex items-center justify-center"
-              disabled={!!dateError || !!areaError}
+              className={`w-full ${
+                isProcessing 
+                  ? 'bg-yellow-500 cursor-wait' 
+                  : registrationComplete 
+                    ? 'bg-blue-600 hover:bg-blue-700' 
+                    : 'bg-green-600 hover:bg-green-700'
+              } text-white py-3 px-4 rounded-md font-medium transition duration-300 flex items-center justify-center`}
+              disabled={isProcessing || (!!dateError || !!areaError)}
             >
-              <span className="relative z-10">Register Crop on Blockchain</span>
-              <ArrowRight className="ml-2 h-5 w-5 animate-pulse" />
+              {isProcessing ? (
+                <>
+                  <Loader className="mr-2 h-5 w-5 animate-spin" />
+                  <span>Processing Transaction...</span>
+                </>
+              ) : registrationComplete ? (
+                <>
+                  <span>Next Step</span>
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              ) : (
+                <>
+                  <span className="relative z-10">Register Crop on Blockchain</span>
+                  <ArrowRight className="ml-2 h-5 w-5 animate-pulse" />
+                </>
+              )}
             </button>
-            <p className="text-center text-xs text-gray-500 mt-2 flex items-center justify-center gap-1">
-              <Lock className="h-3 w-3" />
-              Secured by NERO Chain | Zero gas fees
-            </p>
+            
+            {!isProcessing && !registrationComplete && (
+              <p className="text-center text-xs text-gray-500 mt-2 flex items-center justify-center gap-1">
+                <Lock className="h-3 w-3" />
+                Secured by NERO Chain | Zero gas fees
+              </p>
+            )}
+            
+            {isProcessing && (
+              <p className="text-center text-xs text-amber-600 mt-2 flex items-center justify-center gap-1">
+                <Loader className="h-3 w-3 animate-spin" />
+                <span>Please wait while we register your crop on the blockchain...</span>
+              </p>
+            )}
           </div>
         </div>
       </form>
