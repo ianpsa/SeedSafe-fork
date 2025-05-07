@@ -95,6 +95,22 @@ Continuous learning is supported through:
 </div>
 <p style={{textAlign: 'center'}}>Source: Produced by the Authors (2025).</p>
 
+## Future Enhancement: Advanced User Guidance
+
+For users who complete multiple transactions and demonstrate engagement with the platform, we're developing enhanced educational resources:
+
+- **MetaMask Connection Tutorial** - A comprehensive video guide for users ready to advance their blockchain knowledge
+- **Smart Pop-up Implementation** - Contextual tutorials triggered by usage patterns and transaction history
+- **Progressive Technical Education** - Advanced blockchain concepts introduced only after platform familiarity is established
+
+This approach ensures that technical complexity is introduced only when users have demonstrated readiness, maintaining our commitment to accessibility while supporting growth in blockchain literacy.
+
+<div style={{ display: "flex", justifyContent: "center", marginTop: "2rem", marginBottom: "2rem" }}>
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/3knjjR0D3C8?si=1X3c7g_VoNC90Ded" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+
+
 ## Conclusion
 
 SeedSafe's onboarding succeeds by prioritizing human needs over technical showcase. By introducing blockchain capabilities at the moment they become relevant to the user's goals, we create an experience where technology serves people rather than requiring people to adapt to technology.
