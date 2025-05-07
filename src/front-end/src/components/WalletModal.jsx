@@ -11,6 +11,8 @@ import { useConnect, useAccount, useDisconnect } from 'wagmi';
 // Updated imports for Wagmi v2 connectors
 import { injected, walletConnect, coinbaseWallet } from 'wagmi/connectors'; 
 import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { parseToTokenUnits, formatFromTokenUnits, isValidEthereumAddress } from '../utils/ethersHelpers';
+import { getAAWalletAddress, isAAWalletDeployed } from '../utils/aaUtils';
 
 import metamaskIcon from "../assets/metamask.svg";
 import coinbaseIcon from "../assets/coinbase.svg";
@@ -145,11 +147,11 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
       setConnecting(null);
       return;
     }
-    // Ensure required AA config is present
+
     if (!entryPointAddress || !simpleAccountFactoryAddress) {
-       setError("Account Abstraction configuration missing (EntryPoint/Factory).");
-       setConnecting(null);
-       return;
+      setError("Account Abstraction configuration missing (EntryPoint/Factory).");
+      setConnecting(null);
+      return;
     }
 
     try {
@@ -158,17 +160,13 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
         throw new Error("Web3Auth connection failed.");
       }
 
-      // Create provider manually for ethers v5 or v6 compatibility
       console.log("Creating provider from web3authProvider...");
       let ethersProvider;
       
-      // Check if we're using ethers v5 or v6
       if (ethers.providers && ethers.providers.Web3Provider) {
-        // ethers v5
         console.log("Using ethers v5 Web3Provider");
         ethersProvider = new ethers.providers.Web3Provider(web3authProvider);
       } else if (ethers.BrowserProvider) {
-        // ethers v6
         console.log("Using ethers v6 BrowserProvider");
         ethersProvider = new ethers.BrowserProvider(web3authProvider);
       } else {
@@ -177,34 +175,71 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
       
       const eoaSigner = await ethersProvider.getSigner();
       const eoaAddress = await eoaSigner.getAddress();
+
+      // Log detalhado para debug
+      console.log("EOA Address received:", eoaAddress);
+      console.log("EOA Address type:", typeof eoaAddress);
+      console.log("EOA Address length:", eoaAddress.length);
+
+      // Validação mais robusta do endereço EOA
+      if (!eoaAddress) {
+        throw new Error("Nenhum endereço EOA recebido do Web3Auth");
+      }
+
+      if (typeof eoaAddress !== 'string') {
+        throw new Error(`Tipo inválido de endereço EOA: ${typeof eoaAddress}`);
+      }
+
+      if (!eoaAddress.startsWith('0x')) {
+        throw new Error(`Endereço EOA inválido: deve começar com '0x'`);
+      }
+
+      if (eoaAddress.length !== 42) {
+        throw new Error(`Endereço EOA inválido: comprimento incorreto (${eoaAddress.length})`);
+      }
+
+      if (!isValidEthereumAddress(eoaAddress)) {
+        throw new Error(`Endereço EOA inválido: ${eoaAddress}`);
+      }
+
       console.log("EOA Signer Address (from Web3Auth):", eoaAddress);
 
+      // Obter endereço da conta AA
+      const aaAddress = await getAAWalletAddress(eoaSigner);
+      console.log("AA Address received:", aaAddress);
+
+      if (!aaAddress) {
+        throw new Error("Nenhum endereço AA gerado");
+      }
+
+      if (!isValidEthereumAddress(aaAddress)) {
+        throw new Error(`Endereço AA inválido: ${aaAddress}`);
+      }
+
+      // Verificar se a conta AA já está implantada
+      const isDeployed = await isAAWalletDeployed(aaAddress);
+      console.log(`Smart Account ${aaAddress} deployment status:`, isDeployed);
+
       console.log("Initializing SimpleAccount...");
-      // Building options object with conditionals to handle potential API differences
       const accountOptions = {
         entryPoint: entryPointAddress,
         factory: simpleAccountFactoryAddress,
         overrideBundlerRpc: bundlerUrl
       };
       
-      // Only add paymaster if we have the necessary config
       if (paymasterApiKey && paymasterUrl) {
         try {
           console.log("Configuring paymaster...");
-          // Try different patterns based on Userop SDK structure
           if (Presets.Paymaster && typeof Presets.Paymaster.verifyingPaymaster === 'function') {
-            console.log("Using Presets.Paymaster.verifyingPaymaster");
             accountOptions.paymasterMiddleware = Presets.Paymaster.verifyingPaymaster(
               paymasterUrl, { apiKey: paymasterApiKey }
             );
           } else if (Presets.Builder && Presets.Builder.Middleware && 
                      typeof Presets.Builder.Middleware.verifyingPaymaster === 'function') {
-            console.log("Using Presets.Builder.Middleware.verifyingPaymaster");
             accountOptions.paymasterMiddleware = Presets.Builder.Middleware.verifyingPaymaster(
               paymasterUrl, { apiKey: paymasterApiKey }
             );
           } else {
-            // Last resort: direct middleware integration if structure is unknown
             console.log("Using custom paymaster configuration");
             accountOptions.paymasterUrl = paymasterUrl;
             accountOptions.paymasterApiKey = paymasterApiKey;
@@ -221,9 +256,6 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
         accountOptions
       );
 
-      const aaAddress = simpleAccount.getSender();
-      console.log(`SimpleAccount initialized for ${eoaAddress} at ${aaAddress}`);
-
       if (onLogin) {
         onLogin("producer", {
           address: aaAddress,
@@ -232,6 +264,7 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
           eoaAddress: eoaAddress,
           chainId: chainId,
           isSmartAccount: true,
+          isDeployed: isDeployed
         });
       }
 
@@ -239,9 +272,13 @@ const WalletModal = ({ isOpen, onClose, onLogin }) => {
     } catch (err) {
       console.error("Smart Account creation/login error:", err);
       if (web3authInstance && web3authInstance.status === "connected") {
-        try { await web3authInstance.logout(); } catch (logoutErr) { console.error("Web3Auth logout failed:", logoutErr); }
+        try { 
+          await web3authInstance.logout(); 
+        } catch (logoutErr) { 
+          console.error("Web3Auth logout failed:", logoutErr); 
+        }
       }
-      setError(err.message || "Failed to create or login with Smart Account");
+      setError(err.message || "Falha ao criar ou fazer login com Smart Account");
     } finally {
       setConnecting(null);
     }

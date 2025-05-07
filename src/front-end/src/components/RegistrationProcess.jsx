@@ -1,33 +1,12 @@
 import React, { useState } from 'react';
 import CropForm from './RegistrationProcess/CropForm';
-import { ethers } from "ethers"; // Ethers v5
-
-// Import icons
+import { ethers } from "ethers";
 import { CheckCircle, Loader2, AlertCircle, Info } from 'lucide-react';
+import { parseToTokenUnits, formatFromTokenUnits, isValidEthereumAddress } from '../utils/ethersHelpers';
+import { getAAWalletAddress, isAAWalletDeployed } from '../utils/aaUtils';
 
 // NERO Chain Contract address
 const HARVEST_MANAGER_ADDRESS = '0x0fC5025C764cE34df352757e82f7B5c4Df39A836';
-
-// Helper function to convert USD price to token units (implemented manually)
-const parseToTokenUnits = (value, decimals = 18) => {
-  if (!value && value !== 0) return "0";
-  
-  try {
-    // Ensure the value is a string and replace commas with dots
-    const valueStr = value.toString().replace(',', '.');
-    
-    // Manual implementation for conversion
-    const valueFloat = parseFloat(valueStr);
-    if (isNaN(valueFloat)) return "0";
-    
-    const multiplier = Math.pow(10, decimals);
-    const valueInWei = Math.floor(valueFloat * multiplier).toString();
-    return valueInWei;
-  } catch (error) {
-    console.error("Error converting value to token units:", error);
-    return "0";
-  }
-};
 
 const RegistrationProcess = ({ walletInfo }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -44,7 +23,7 @@ const RegistrationProcess = ({ walletInfo }) => {
   const [registrationResult, setRegistrationResult] = useState(null);
   const [error, setError] = useState(null);
   const [txHash, setTxHash] = useState('');
-  const [txStatus, setTxStatus] = useState(''); // 'submitting', 'pending', 'confirmed', 'failed'
+  const [txStatus, setTxStatus] = useState('');
 
   // Form event handlers
   const handleInputChange = (e) => {
@@ -67,6 +46,52 @@ const RegistrationProcess = ({ walletInfo }) => {
     }
   };
 
+  // Verificar se a conta AA está implantada
+  const checkAAWalletDeployment = async () => {
+    try {
+      if (!walletInfo?.address) {
+        throw new Error("Endereço da carteira não disponível");
+      }
+
+      const isDeployed = await isAAWalletDeployed(walletInfo.address);
+      if (!isDeployed) {
+        throw new Error("Conta AA ainda não está implantada. Por favor, aguarde a implantação.");
+      }
+      return true;
+    } catch (error) {
+      console.error("Erro ao verificar implantação da conta AA:", error);
+      throw error;
+    }
+  };
+
+  // Validação dos dados do formulário
+  const validateFormData = async (data) => {
+    if (!data.cropType || !data.quantity || 
+        !data.pricePerUnitUSD || !data.area || 
+        !data.harvestDate || !data.location) {
+      throw new Error("Dados do formulário incompletos. Por favor, verifique todos os campos.");
+    }
+
+    if (!walletInfo) {
+      throw new Error("Carteira não conectada. Por favor, conecte antes de continuar.");
+    }
+
+    if (walletInfo.role !== 'producer') {
+      throw new Error("Apenas produtores podem registrar safras. Por favor, conecte com uma conta de produtor.");
+    }
+
+    if (!walletInfo.signer) {
+      throw new Error("Assinante da carteira não inicializado corretamente");
+    }
+
+    if (!isValidEthereumAddress(walletInfo.address)) {
+      throw new Error("Endereço da carteira inválido");
+    }
+
+    // Verificar implantação da conta AA
+    await checkAAWalletDeployment();
+  };
+
   // Handle form submission using the NERO AA-specific SimpleAccount
   const handleCropSubmit = async (e, submittedData = null) => {
     e.preventDefault();
@@ -75,57 +100,33 @@ const RegistrationProcess = ({ walletInfo }) => {
     setTxStatus('submitting');
     
     try {
-      console.log("Starting crop registration process with NERO AA...");
+      console.log("Iniciando processo de registro de safra com NERO AA...");
       
-      // Use passed data or fall back to formData
       const dataToProcess = submittedData || formData;
-      console.log("Form data for processing:", dataToProcess);
+      console.log("Dados do formulário para processamento:", dataToProcess);
       
-      // Check if we have wallet information
-      if (!walletInfo) {
-        throw new Error("Wallet not connected. Please connect before continuing.");
-      }
+      // Validar dados
+      await validateFormData(dataToProcess);
       
-      if (walletInfo.role !== 'producer') {
-        throw new Error("Only producers can register crops. Please connect with a producer account.");
-      }
-      
-      // Validate critical data
-      if (!dataToProcess.cropType || !dataToProcess.quantity || 
-          !dataToProcess.pricePerUnitUSD || !dataToProcess.area || 
-          !dataToProcess.harvestDate || !dataToProcess.location) {
-        throw new Error("Incomplete form data. Please check all fields.");
-      }
-      
-      // Check if we have a signer
-      if (!walletInfo.signer) {
-        throw new Error("Wallet signer not properly initialized");
-      }
-      
-      // Convert price to token units
+      // Converter preço para unidades de token usando a função utilitária
       const priceInTokens = parseToTokenUnits(dataToProcess.pricePerUnitUSD);
-      console.log("Price converted to token units:", priceInTokens);
+      console.log("Preço convertido para unidades de token:", priceInTokens);
       
-      // Create documentation string
-      const documentation = `Producer: ${walletInfo.address}, ` +
-                           `Location: ${dataToProcess.location}, ` +
-                           `Area: ${dataToProcess.area}ha, ` +
-                           `Practices: ${dataToProcess.sustainablePractices.join(',')}`;
+      // Criar string de documentação
+      const documentation = `Produtor: ${walletInfo.address}, ` +
+                           `Localização: ${dataToProcess.location}, ` +
+                           `Área: ${dataToProcess.area}ha, ` +
+                           `Práticas: ${dataToProcess.sustainablePractices.join(',')}`;
       
-      console.log("Documentation string:", documentation);
+      console.log("String de documentação:", documentation);
       
-      // Calculate harvest date timestamp
+      // Calcular timestamp da data de colheita
       const harvestDateTimestamp = Math.floor(new Date(dataToProcess.harvestDate).getTime() / 1000);
       
-      // Get the signer from walletInfo
+      // Obter o assinante do walletInfo
       const simpleAccount = walletInfo.signer;
       
-      // Debug: Log available methods on the signer object
-      console.log("Available methods on signer:", Object.getOwnPropertyNames(
-        Object.getPrototypeOf(simpleAccount)
-      ).filter(prop => typeof simpleAccount[prop] === 'function'));
-      
-      // Function signature: createHarvest(string crop, uint256 quantity, uint256 pricePerUnit, uint256 deliveryDate, string documentation)
+      // Interface do contrato
       const iface = new ethers.utils.Interface([
         "function createHarvest(string crop, uint256 quantity, uint256 pricePerUnit, uint256 deliveryDate, string documentation)"
       ]);
@@ -138,126 +139,65 @@ const RegistrationProcess = ({ walletInfo }) => {
         documentation
       ]);
       
-      console.log("Encoded callData:", callData);
+      console.log("CallData codificado:", callData);
       
-      // Set pending status
       setTxStatus('pending');
       
-      // Create and execute the transaction using the NERO AA SDK
+      // Criar e executar a transação usando o SDK NERO AA
       let userOpHash;
       
-      // Try different methods to support various AA SDK implementations
-      if (typeof simpleAccount.execute === 'function') {
-        // Method 1: Direct execute method (common in AA SDKs)
-        console.log("Using execute method");
-        userOpHash = await simpleAccount.execute(
-          HARVEST_MANAGER_ADDRESS, // target
-          0, // value (0 ETH)
-          callData
-        );
-      } else if (typeof simpleAccount.createUnsignedUserOp === 'function' && typeof simpleAccount.sendUserOp === 'function') {
-        // Method 2: Two-step create and send userOp
-        console.log("Using createUnsignedUserOp + sendUserOp method");
-        const userOp = await simpleAccount.createUnsignedUserOp({
-          target: HARVEST_MANAGER_ADDRESS,
-          data: callData,
-          value: 0
-        });
-        userOpHash = await simpleAccount.sendUserOp(userOp);
-      } else if (typeof simpleAccount.executeBatch === 'function') {
-        // Method 3: Batch execution (some AA SDKs use this approach)
-        console.log("Using executeBatch method");
-        userOpHash = await simpleAccount.executeBatch([
-          {
+      try {
+        if (typeof simpleAccount.execute === 'function') {
+          userOpHash = await simpleAccount.execute(
+            HARVEST_MANAGER_ADDRESS,
+            0,
+            callData
+          );
+        } else if (typeof simpleAccount.createUnsignedUserOp === 'function' && 
+                   typeof simpleAccount.sendUserOp === 'function') {
+          const userOp = await simpleAccount.createUnsignedUserOp({
             target: HARVEST_MANAGER_ADDRESS,
-            value: 0,
-            data: callData
-          }
-        ]);
-      } else if (simpleAccount.execTransactionFromEntryPoint) {
-        // Method 4: EntryPoint direct execution (older AA SDKs)
-        console.log("Using execTransactionFromEntryPoint method");
-        userOpHash = await simpleAccount.execTransactionFromEntryPoint({
-          to: HARVEST_MANAGER_ADDRESS,
-          value: 0,
-          data: callData
-        });
-      } else {
-        // Last resort: Try to find any method that might work
-        const possibleMethods = ['executeTransaction', 'sendTransaction', 'sendUserOperation'];
-        let methodFound = false;
-        
-        for (const method of possibleMethods) {
-          if (typeof simpleAccount[method] === 'function') {
-            console.log(`Using ${method} method`);
-            methodFound = true;
-            
-            if (method === 'sendTransaction') {
-              userOpHash = await simpleAccount[method]({
-                to: HARVEST_MANAGER_ADDRESS,
-                data: callData,
-                value: 0
-              });
-            } else {
-              userOpHash = await simpleAccount[method]({
-                target: HARVEST_MANAGER_ADDRESS,
-                data: callData,
-                value: 0
-              });
-            }
-            break;
-          }
+            data: callData,
+            value: 0
+          });
+          userOpHash = await simpleAccount.sendUserOp(userOp);
+        } else {
+          throw new Error("Método de execução não suportado pelo SDK NERO AA");
         }
         
-        if (!methodFound) {
-          throw new Error("No compatible method found in the NERO AA SDK. Check SDK version or documentation.");
+        console.log("Transação enviada para NERO Chain:", userOpHash);
+        setTxHash(userOpHash?.hash || userOpHash?.transactionHash || userOpHash);
+        
+        if (userOpHash && typeof userOpHash.wait === 'function') {
+          console.log("Aguardando confirmação da transação...");
+          const receipt = await userOpHash.wait();
+          console.log("Transação confirmada na NERO Chain:", receipt);
+          
+          setTxStatus('confirmed');
+          setRegistrationResult({
+            success: true,
+            cropId: receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
+            timestamp: new Date().toISOString(),
+            transactionHash: receipt?.transactionHash || userOpHash?.hash || userOpHash
+          });
+        } else {
+          setTxStatus('confirmed');
+          setRegistrationResult({
+            success: true,
+            cropId: Math.floor(Math.random() * 1000).toString(),
+            timestamp: new Date().toISOString(),
+            transactionHash: userOpHash?.hash || userOpHash
+          });
         }
+      } catch (txError) {
+        console.error("Erro na execução da transação:", txError);
+        throw new Error(`Falha na execução da transação: ${txError.message}`);
       }
       
-      console.log("Transaction sent to NERO Chain:", userOpHash);
-      // Handle different response formats
-      setTxHash(userOpHash?.hash || userOpHash?.transactionHash || userOpHash);
-      
-      // Wait for transaction confirmation if the method returns a waitable promise
-      if (userOpHash && typeof userOpHash.wait === 'function') {
-        console.log("Waiting for transaction confirmation...");
-        const receipt = await userOpHash.wait();
-        console.log("Transaction confirmed on NERO Chain:", receipt);
-        
-        // Update status
-        setTxStatus('confirmed');
-        
-        // Store registration result
-        setRegistrationResult({
-          success: true,
-          cropId: receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
-          timestamp: new Date().toISOString(),
-          transactionHash: receipt?.transactionHash || userOpHash?.hash || userOpHash
-        });
-      } else {
-        // If not waitable, assume it succeeded after a delay
-        console.log("Transaction submitted, but no wait method available");
-        setTxStatus('confirmed');
-        
-        // Store registration result
-        setRegistrationResult({
-          success: true,
-          cropId: Math.floor(Math.random() * 1000).toString(),
-          timestamp: new Date().toISOString(),
-          transactionHash: userOpHash?.hash || userOpHash
-        });
-      }
-      
-      // Move to next step
-      setCurrentStep(2);
-      
-    } catch (error) {
-      console.error("Error registering crop with NERO AA:", error);
+    } catch (err) {
+      console.error("Erro no registro da safra:", err);
+      setError(err.message || "Falha ao registrar safra");
       setTxStatus('failed');
-      
-      // Format a more user-friendly error message
-      let errorMessage = "Transaction failed: " + (error.message || "Unknown error");
-      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

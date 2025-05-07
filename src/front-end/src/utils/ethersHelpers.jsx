@@ -121,20 +121,56 @@ export const parseToTokenUnits = (value, decimals = 18) => {
    */
   export const isValidEthereumAddress = (address) => {
     try {
+      // Validações básicas
+      if (!address) {
+        console.warn("Endereço vazio ou undefined");
+        return false;
+      }
+
+      if (typeof address !== 'string') {
+        console.warn(`Tipo inválido de endereço: ${typeof address}`);
+        return false;
+      }
+
+      if (!address.startsWith('0x')) {
+        console.warn("Endereço não começa com '0x'");
+        return false;
+      }
+
+      if (address.length !== 42) {
+        console.warn(`Comprimento inválido do endereço: ${address.length}`);
+        return false;
+      }
+
+      // Tentar usar ethers.js para validação
       const ethers = window.ethers || global.ethers;
       
-      // Para ethers v6
-      if (typeof ethers.isAddress === 'function') {
-        return ethers.isAddress(address);
-      }
-      
-      // Para ethers v5
-      if (ethers.utils && typeof ethers.utils.isAddress === 'function') {
-        return ethers.utils.isAddress(address);
+      if (ethers) {
+        // Para ethers v6
+        if (typeof ethers.isAddress === 'function') {
+          const isValid = ethers.isAddress(address);
+          if (!isValid) {
+            console.warn("Endereço inválido (ethers v6)");
+          }
+          return isValid;
+        }
+        
+        // Para ethers v5
+        if (ethers.utils && typeof ethers.utils.isAddress === 'function') {
+          const isValid = ethers.utils.isAddress(address);
+          if (!isValid) {
+            console.warn("Endereço inválido (ethers v5)");
+          }
+          return isValid;
+        }
       }
       
       // Implementação básica de fallback - verificar formato
-      return /^0x[a-fA-F0-9]{40}$/.test(address);
+      const isValid = /^0x[a-fA-F0-9]{40}$/.test(address);
+      if (!isValid) {
+        console.warn("Endereço não corresponde ao formato esperado");
+      }
+      return isValid;
       
     } catch (error) {
       console.error("Erro ao verificar endereço Ethereum:", error);
