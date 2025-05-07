@@ -1,7 +1,7 @@
 // Importação direta da imagem
 import { Link } from "react-router-dom";
 import heroImage from "../assets/DesignToken.png"; // Ajuste o caminho conforme necessário
-import { ButtonTooltip } from "./ButtonTooltips"; // Import the ButtonTooltip component
+import { ButtonTooltip } from "./ButtonToolTips"; // Import the ButtonTooltip component
 import bgPattern from "../assets/bg-pattern.svg";
 
 
