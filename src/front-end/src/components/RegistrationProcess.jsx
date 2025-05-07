@@ -1,29 +1,109 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import StepCircles from './RegistrationProcess/StepCircles';
 import CropForm from './RegistrationProcess/CropForm';
+import LoginForm from './RegistrationProcess/LoginForm';
+import VerificationStatus from './RegistrationProcess/VerificationStatus';
+import MarketplaceStatus from './RegistrationProcess/MarketplaceStatus';
 import { ethers } from "ethers";
+import { registerHarvestUserOp } from "../utils/userOp/registerHarvestUserOp";
+import { isValidEthereumAddress } from "../utils/ethersHelpers";
 import { CheckCircle, Loader2, AlertCircle, Info } from 'lucide-react';
-import { parseToTokenUnits, formatFromTokenUnits, isValidEthereumAddress } from '../utils/ethersHelpers';
+import { parseToTokenUnits, formatFromTokenUnits } from '../utils/ethersHelpers';
 import { getAAWalletAddress, isAAWalletDeployed } from '../utils/aaUtils';
 
 // NERO Chain Contract address
 const HARVEST_MANAGER_ADDRESS = '0x0fC5025C764cE34df352757e82f7B5c4Df39A836';
 
-const RegistrationProcess = ({ walletInfo }) => {
+const RegistrationProcess = ({ setCurrentPage, isLoggedIn, setIsLoggedIn, web3authProvider }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
   const [formData, setFormData] = useState({
     cropType: '',
     quantity: '',
-    pricePerUnitUSD: '',
-    area: '',
     harvestDate: '',
     location: '',
+    area: '',
     sustainablePractices: []
   });
-  const [registrationResult, setRegistrationResult] = useState(null);
+  const [registrationStatus, setRegistrationStatus] = useState(null);
+  const [salesProgress, setSalesProgress] = useState(0);
   const [error, setError] = useState(null);
   const [txHash, setTxHash] = useState('');
   const [txStatus, setTxStatus] = useState('');
+
+  // Função para obter o signer do Web3Auth
+  const getWeb3AuthSigner = async () => {
+    if (!web3authProvider) {
+      throw new Error("Provedor Web3Auth não disponível");
+    }
+
+    let ethersProvider;
+    if (ethers.providers && ethers.providers.Web3Provider) {
+      ethersProvider = new ethers.providers.Web3Provider(web3authProvider);
+    } else if (ethers.BrowserProvider) {
+      ethersProvider = new ethers.BrowserProvider(web3authProvider);
+    } else {
+      throw new Error("Versão do ethers não suportada");
+    }
+
+    return await ethersProvider.getSigner();
+  };
+
+  // Função para validar os dados do formulário
+  const validateFormData = async () => {
+    if (!web3authProvider) {
+      throw new Error("Por favor, conecte sua carteira primeiro");
+    }
+
+    if (!formData.cropType || !formData.quantity || !formData.harvestDate || !formData.location || !formData.area) {
+      throw new Error("Por favor, preencha todos os campos obrigatórios");
+    }
+
+    const signer = await getWeb3AuthSigner();
+    const address = await signer.getAddress();
+
+    if (!isValidEthereumAddress(address)) {
+      throw new Error("Endereço da carteira inválido");
+    }
+
+    return true;
+  };
+
+  // Função para lidar com o envio do formulário
+  const handleStepOneSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      await validateFormData();
+      const signer = await getWeb3AuthSigner();
+
+      const crop = formData.cropType;
+      const quantity = parseInt(formData.quantity);
+      const price = 25;
+      const deliveryDate = Math.floor(new Date(formData.harvestDate).getTime() / 1000);
+      const doc = formData.location || "doc://placeholder";
+
+      const userOpHash = await registerHarvestUserOp(signer, {
+        crop,
+        quantity,
+        price,
+        deliveryDate,
+        doc,
+      });
+
+      console.log("✅ Safra registrada com UserOperation:", userOpHash);
+      setShowLogin(true);
+
+    } catch (err) {
+      console.error("Erro ao registrar safra:", err);
+      setError(err.message || "Erro ao registrar safra");
+    }
+  };
 
   // Form event handlers
   const handleInputChange = (e) => {
@@ -49,11 +129,11 @@ const RegistrationProcess = ({ walletInfo }) => {
   // Verificar se a conta AA está implantada
   const checkAAWalletDeployment = async () => {
     try {
-      if (!walletInfo?.address) {
+      if (!web3authProvider) {
         throw new Error("Endereço da carteira não disponível");
       }
 
-      const isDeployed = await isAAWalletDeployed(walletInfo.address);
+      const isDeployed = await isAAWalletDeployed(web3authProvider);
       if (!isDeployed) {
         throw new Error("Conta AA ainda não está implantada. Por favor, aguarde a implantação.");
       }
@@ -64,38 +144,9 @@ const RegistrationProcess = ({ walletInfo }) => {
     }
   };
 
-  // Validação dos dados do formulário
-  const validateFormData = async (data) => {
-    if (!data.cropType || !data.quantity || 
-        !data.pricePerUnitUSD || !data.area || 
-        !data.harvestDate || !data.location) {
-      throw new Error("Dados do formulário incompletos. Por favor, verifique todos os campos.");
-    }
-
-    if (!walletInfo) {
-      throw new Error("Carteira não conectada. Por favor, conecte antes de continuar.");
-    }
-
-    if (walletInfo.role !== 'producer') {
-      throw new Error("Apenas produtores podem registrar safras. Por favor, conecte com uma conta de produtor.");
-    }
-
-    if (!walletInfo.signer) {
-      throw new Error("Assinante da carteira não inicializado corretamente");
-    }
-
-    if (!isValidEthereumAddress(walletInfo.address)) {
-      throw new Error("Endereço da carteira inválido");
-    }
-
-    // Verificar implantação da conta AA
-    await checkAAWalletDeployment();
-  };
-
   // Handle form submission using the NERO AA-specific SimpleAccount
   const handleCropSubmit = async (e, submittedData = null) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
     setTxStatus('submitting');
     
@@ -106,14 +157,14 @@ const RegistrationProcess = ({ walletInfo }) => {
       console.log("Dados do formulário para processamento:", dataToProcess);
       
       // Validar dados
-      await validateFormData(dataToProcess);
+      await validateFormData();
       
       // Converter preço para unidades de token usando a função utilitária
       const priceInTokens = parseToTokenUnits(dataToProcess.pricePerUnitUSD);
       console.log("Preço convertido para unidades de token:", priceInTokens);
       
       // Criar string de documentação
-      const documentation = `Produtor: ${walletInfo.address}, ` +
+      const documentation = `Produtor: ${web3authProvider}, ` +
                            `Localização: ${dataToProcess.location}, ` +
                            `Área: ${dataToProcess.area}ha, ` +
                            `Práticas: ${dataToProcess.sustainablePractices.join(',')}`;
@@ -124,7 +175,7 @@ const RegistrationProcess = ({ walletInfo }) => {
       const harvestDateTimestamp = Math.floor(new Date(dataToProcess.harvestDate).getTime() / 1000);
       
       // Obter o assinante do walletInfo
-      const simpleAccount = walletInfo.signer;
+      const simpleAccount = await getWeb3AuthSigner();
       
       // Interface do contrato
       const iface = new ethers.utils.Interface([
@@ -174,7 +225,7 @@ const RegistrationProcess = ({ walletInfo }) => {
           console.log("Transação confirmada na NERO Chain:", receipt);
           
           setTxStatus('confirmed');
-          setRegistrationResult({
+          setRegistrationStatus({
             success: true,
             cropId: receipt?.logs?.[0]?.topics?.[1] || Math.floor(Math.random() * 1000).toString(),
             timestamp: new Date().toISOString(),
@@ -182,7 +233,7 @@ const RegistrationProcess = ({ walletInfo }) => {
           });
         } else {
           setTxStatus('confirmed');
-          setRegistrationResult({
+          setRegistrationStatus({
             success: true,
             cropId: Math.floor(Math.random() * 1000).toString(),
             timestamp: new Date().toISOString(),
@@ -198,8 +249,6 @@ const RegistrationProcess = ({ walletInfo }) => {
       console.error("Erro no registro da safra:", err);
       setError(err.message || "Falha ao registrar safra");
       setTxStatus('failed');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -217,177 +266,53 @@ const RegistrationProcess = ({ walletInfo }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6 min-h-[70vh]">
-      <h1 className="text-2xl sm:text-3xl font-bold text-green-800 mb-6">
-        Crop Registration with NERO AA
+    <div className="max-w-4xl mx-auto py-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center animate-fadeIn">
+        Register Your Crop
       </h1>
-      
-      {/* Progress bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-8">
-        <div 
-          className="bg-green-600 h-2.5 rounded-full transition-all duration-500" 
-          style={{ width: `${currentStep === 1 ? '50%' : '100%'}` }}
-        ></div>
-      </div>
-      
-      {/* NERO Smart Account Information */}
-      {walletInfo?.isSmartAccount && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-6 flex items-start gap-3">
-          <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-medium">Using NERO Smart Account:</p>
-            <p className="text-sm">You are connected with a NERO Smart Account. Your transaction will be processed using Account Abstraction.</p>
-            <p className="text-sm mt-2">Address: {safeStringify(walletInfo.address)}</p>
-            <p className="text-sm mt-1">Network: NERO Chain (Testnet)</p>
-            <p className="text-sm mt-1">Gas Sponsored: Yes (via NERO Paymaster)</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Wallet Connection Status */}
-      {(!walletInfo || walletInfo.role !== 'producer') && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6 flex items-start gap-3">
-          <Info className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-medium">Producer Account Required:</p>
-            <p>Please connect your wallet as a producer to register a crop. Only producer accounts can register new crops.</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Global error message */}
+
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-medium">Error:</p>
-            <p>{safeStringify(error)}</p>
-          </div>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <span className="block sm:inline">{error}</span>
         </div>
       )}
       
-      {/* Transaction status message */}
-      {txStatus && txStatus !== 'confirmed' && (
-        <div className={`mb-6 p-4 rounded-md flex items-start gap-3 ${
-          txStatus === 'submitting' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
-          txStatus === 'pending' ? 'bg-yellow-50 border border-yellow-200 text-yellow-700' :
-          'bg-red-50 border border-red-200 text-red-700'
-        }`}>
-          {txStatus === 'submitting' && <Loader2 className="h-5 w-5 animate-spin text-blue-500 mt-0.5 flex-shrink-0" />}
-          {txStatus === 'pending' && <Loader2 className="h-5 w-5 animate-spin text-yellow-500 mt-0.5 flex-shrink-0" />}
-          {txStatus === 'failed' && <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />}
-          <div>
-            <p className="font-medium">
-              {txStatus === 'submitting' ? 'Preparing NERO Transaction' :
-               txStatus === 'pending' ? 'NERO Transaction Pending' :
-               'Transaction Failed'}
-            </p>
-            {txHash && (
-              <p className="text-sm mt-1 break-all">
-                Transaction Hash: {safeStringify(txHash)}
-              </p>
-            )}
-            {txStatus === 'pending' && (
-              <p className="text-sm mt-1">
-                Please wait while the transaction is being confirmed on the NERO blockchain.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      <StepCircles currentStep={currentStep} registrationStatus={registrationStatus} />
       
-      {/* Step 1: Registration Form */}
-      {currentStep === 1 && (
-        <CropForm 
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleCheckboxChange={handleCheckboxChange}
-          handleStepOneSubmit={handleCropSubmit}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      
-      {/* Step 2: Confirmation and receipt */}
-      {currentStep === 2 && registrationResult && (
-        <div className="bg-green-50 rounded-lg p-6 border border-green-200 animate-fadeIn">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-              <CheckCircle className="h-10 w-10 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-green-800">Registration Completed Successfully!</h2>
-            <p className="text-green-700 mt-2">
-              Your crop has been registered on NERO Chain and is now pending verification by an auditor.
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg p-4 border border-green-100 mb-6">
-            <h3 className="font-semibold text-green-800 mb-2">Transaction Details</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500">Status</p>
-                <p className="font-medium text-green-600">Transaction Successful</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Date/Time</p>
-                <p className="font-medium">{new Date(registrationResult.timestamp).toLocaleString()}</p>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="text-gray-500">Network</p>
-                <p className="font-medium">NERO Chain (Testnet)</p>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="text-gray-500">Transaction Hash</p>
-                <p className="font-medium break-all">{safeStringify(registrationResult.transactionHash)}</p>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="text-gray-500">Gas Payment</p>
-                <p className="font-medium text-blue-600">Sponsored by NERO Paymaster</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-amber-50 rounded-lg p-4 border border-amber-100 mb-6">
-            <h3 className="font-semibold text-amber-800 mb-2 flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2" />
-              Next Steps
-            </h3>
-            <p className="text-amber-700 text-sm">
-              Your crop registration has been submitted to the NERO blockchain and is awaiting verification by an auditor. 
-              After verification, your crop will be listed on the marketplace and available for investors.
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <button 
-              onClick={() => window.location.href = '/marketplace'} 
-              className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition duration-300 flex-1"
-            >
-              Go to Marketplace
-            </button>
-            <button 
-              onClick={() => {
-                setCurrentStep(1);
-                setFormData({
-                  cropType: '',
-                  quantity: '',
-                  pricePerUnitUSD: '',
-                  area: '',
-                  harvestDate: '',
-                  location: '',
-                  sustainablePractices: []
-                });
-                setRegistrationResult(null);
-                setTxHash('');
-                setTxStatus('');
-              }} 
-              
-              className="bg-white hover:bg-gray-50 text-green-700 border border-green-300 py-2 px-4 rounded-md transition duration-300 flex-1"
-            >
-              Register Another Crop
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 border border-gray-100 animate-fadeIn">
+        {showLogin && (
+          <LoginForm 
+            loginData={loginData} 
+            handleLoginChange={handleInputChange} 
+            handleLoginSubmit={handleStepOneSubmit} 
+          />
+        )}
+        
+        {currentStep === 1 && !showLogin && (
+          <CropForm 
+            formData={formData} 
+            handleInputChange={handleInputChange} 
+            handleCheckboxChange={handleCheckboxChange} 
+            handleStepOneSubmit={handleCropSubmit} 
+          />
+        )}
+        
+        {currentStep === 2 && (
+          <VerificationStatus 
+            registrationStatus={registrationStatus} 
+            simulateAuditorDecision={simulateAuditorDecision} 
+          />
+        )}
+        
+        {currentStep === 3 && (
+          <MarketplaceStatus 
+            formData={formData} 
+            salesProgress={salesProgress}
+            carbonCredits={calculateCarbonCredits()}
+            setCurrentPage={setCurrentPage}
+          />
+        )}
+      </div>
     </div>
   );
 };

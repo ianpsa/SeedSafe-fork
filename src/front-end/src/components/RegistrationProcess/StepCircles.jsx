@@ -1,95 +1,42 @@
-import React, { useState } from 'react';
-import { FileText, AlertCircle, Check, X, Lock, DollarSign } from 'lucide-react';
+import React from 'react';
+import { CheckCircle, Circle, AlertCircle } from 'lucide-react';
 
 const StepCircles = ({ currentStep, registrationStatus }) => {
-  const [showTooltip, setShowTooltip] = useState({ step2: false, step3: false });
-  
+  const steps = [
+    { id: 1, label: 'Registro' },
+    { id: 2, label: 'Verificação' },
+    { id: 3, label: 'Marketplace' }
+  ];
+
+  const getStepIcon = (stepId) => {
+    if (stepId < currentStep) {
+      return <CheckCircle className="h-6 w-6 text-green-500" />;
+    }
+    if (stepId === currentStep) {
+      if (registrationStatus === 'rejected') {
+        return <AlertCircle className="h-6 w-6 text-red-500" />;
+      }
+      return <Circle className="h-6 w-6 text-green-500 fill-green-500" />;
+    }
+    return <Circle className="h-6 w-6 text-gray-300" />;
+  };
+
   return (
-    <div className="flex justify-center items-center mb-12 px-4">
-      {/* Step 1: Register */}
-      <div className="flex flex-col items-center">
-        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-lg font-semibold border-2 transition-all duration-500 ${
-          currentStep === 1 ? 'bg-green-500 border-green-500 text-white card-glow' : 
-          currentStep > 1 ? 'bg-green-500 border-green-500 text-white' : 
-          'bg-white border-gray-300 text-gray-700'
-        }`}>
-          <FileText className={`h-5 w-5 md:h-6 md:w-6 ${currentStep === 1 ? 'animate-pulse' : ''}`} />
+    <div className="flex justify-center items-center space-x-8 mb-8">
+      {steps.map((step) => (
+        <div key={step.id} className="flex flex-col items-center">
+          <div className={`flex items-center justify-center w-12 h-12 rounded-full ${
+            step.id === currentStep ? 'bg-green-100' : 'bg-gray-100'
+          }`}>
+            {getStepIcon(step.id)}
+          </div>
+          <span className={`mt-2 text-sm font-medium ${
+            step.id === currentStep ? 'text-green-600' : 'text-gray-500'
+          }`}>
+            {step.label}
+          </span>
         </div>
-        <span className="mt-2 text-xs md:text-sm font-medium text-white">Register</span>
-      </div>
-      
-      {/* Connector line */}
-      <div className={`w-10 md:w-24 h-1 transition-colors duration-500 ${
-        currentStep >= 2 ? 'bg-green-500' : 'bg-gray-300'
-      }`}></div>
-      
-      {/* Step 2: Verification */}
-      <div className="flex flex-col items-center relative">
-        <div 
-          className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-lg font-semibold border-2 transition-all duration-500 ${
-            currentStep === 2 
-              ? (registrationStatus === 'approved' ? 'bg-green-500 border-green-500 text-white card-glow' : 
-                 registrationStatus === 'rejected' ? 'bg-red-500 border-red-500 text-white card-glow' : 
-                 'bg-yellow-500 border-yellow-500 text-white card-glow')
-              : currentStep > 2
-                ? (registrationStatus === 'approved' ? 'bg-green-500 border-green-500 text-white' : 
-                   'bg-red-500 border-red-500 text-white')
-                : 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-          }`}
-          onMouseEnter={() => currentStep < 2 && setShowTooltip({...showTooltip, step2: true})}
-          onMouseLeave={() => setShowTooltip({...showTooltip, step2: false})}
-        >
-          {currentStep >= 2 && registrationStatus === 'pending' ? (
-            <AlertCircle className={`h-5 w-5 md:h-6 md:w-6 ${currentStep === 2 ? 'animate-pulse' : ''}`} />
-          ) : currentStep >= 2 && registrationStatus === 'approved' ? (
-            <Check className={`h-5 w-5 md:h-6 md:w-6 ${currentStep === 2 ? 'animate-pulse' : ''}`} />
-          ) : currentStep >= 2 && registrationStatus === 'rejected' ? (
-            <X className={`h-5 w-5 md:h-6 md:w-6 ${currentStep === 2 ? 'animate-pulse' : ''}`} />
-          ) : (
-            <Lock className="h-5 w-5 md:h-6 md:w-6" />
-          )}
-          
-          {/* Tooltip for locked step */}
-          {showTooltip.step2 && currentStep < 2 && (
-            <div className="absolute -bottom-12 w-40 bg-white text-gray-800 text-xs p-2 rounded shadow-lg z-10 border border-gray-200">
-              Complete the current step to unlock this
-            </div>
-          )}
-        </div>
-        <span className="mt-2 text-xs md:text-sm font-medium text-white">Verification</span>
-      </div>
-      
-      {/* Connector line */}
-      <div className={`w-10 md:w-24 h-1 transition-colors duration-500 ${
-        currentStep >= 3 ? 'bg-green-500' : 'bg-gray-300'
-      }`}></div>
-      
-      {/* Step 3: Marketplace */}
-      <div className="flex flex-col items-center relative">
-        <div 
-          className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-lg font-semibold border-2 transition-all duration-500 ${
-            currentStep === 3 ? 'bg-green-500 border-green-500 text-white card-glow' : 
-            currentStep > 3 ? 'bg-green-500 border-green-500 text-white' : 
-            'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
-          }`}
-          onMouseEnter={() => currentStep < 3 && setShowTooltip({...showTooltip, step3: true})}
-          onMouseLeave={() => setShowTooltip({...showTooltip, step3: false})}
-        >
-          {currentStep >= 3 ? (
-            <DollarSign className={`h-5 w-5 md:h-6 md:w-6 ${currentStep === 3 ? 'animate-pulse' : ''}`} />
-          ) : (
-            <Lock className="h-5 w-5 md:h-6 md:w-6" />
-          )}
-          
-          {/* Tooltip for locked step */}
-          {showTooltip.step3 && currentStep < 3 && (
-            <div className="absolute -bottom-12 w-40 bg-white text-gray-800 text-xs p-2 rounded shadow-lg z-10 border border-gray-200">
-              Complete the current step to unlock this
-            </div>
-          )}
-        </div>
-        <span className="mt-2 text-xs md:text-sm font-medium text-white">Marketplace</span>
-      </div>
+      ))}
     </div>
   );
 };
