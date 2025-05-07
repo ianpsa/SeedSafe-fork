@@ -15,6 +15,10 @@ import { Link } from "react-router-dom";
 import FiltersPanel from "./FiltersPanel";
 import CropCard from "./CropCard";
 import PurchaseModal from "./PurchaseModal";
+import { mockListings } from "./mockData";
+import MarketplaceOnboarding from "./MarketplaceOnboarding";
+import BlockchainSecurityInfo from "./BlockchainSecurityInfo";
+import MarketplaceHowItWorksButton from "./HowItWorksButton"; // Import the new button component
 
 // Import ABI and contract address
 import HarvestManagerABI from '../../abi/abiHarvest.json';
@@ -82,6 +86,9 @@ const Marketplace = ({ walletInfo }) => {
     harvestDateBefore: null,
     cropTypes: [],
   });
+  
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const provider = usePublicClient();
   // Get the EOA signer using Wagmi's hook for connected wallet
@@ -135,6 +142,25 @@ const Marketplace = ({ walletInfo }) => {
     };
     fetchHarvests();
   }, [provider]);
+
+    setIsLoading(true);
+    setTimeout(() => {
+      setListings(mockListings);
+      setFilteredListings(mockListings);
+      setIsLoading(false);
+    }, 800);
+  }, []);
+  
+  // Handler for the "How It Works" button
+  const handleHowItWorksClick = () => {
+    // Mostrar o onboarding independentemente de ter sido concluído antes
+    setShowOnboarding(true);
+  };
+  
+  // Handle onboarding completion
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
 
   // Format fetched data
   useEffect(() => {
@@ -274,8 +300,7 @@ const Marketplace = ({ walletInfo }) => {
   const getAnimationDelay = (index) => `${index * 50}ms`;
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 bg-slate-100 min-h-screen">
-      {/* Header and Register Link */}
+    <div className="bg-white rounded-lg shadow-lg mb-5 pt-4 border border-gray-100 animate-fadeIn max-w-7xl mx-auto py-8 px-4 bg-slate-100 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-slate-800 flex items-center">
           <Leaf className="mr-2 h-8 w-8 text-green-600" />
@@ -288,16 +313,25 @@ const Marketplace = ({ walletInfo }) => {
         )}
       </div>
 
-      {/* Info Box and Filters */}
+
+      <BlockchainSecurityInfo />
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8 transition-all duration-300 hover:shadow-xl">
         <div className="flex items-start gap-2">
           <Info className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
           <p className="text-gray-700 mb-6">Browse sustainable farming opportunities on NERO Chain. All transactions use the NERO token.</p>
         </div>
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-grow relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Search className="h-5 w-5 text-gray-400" /></div>
-            <input type="text" placeholder="Search by crop, producer address, or location" className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300" value={searchQuery} onChange={handleSearch} />
+          <div className="flex-grow relative search-bar">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by crop, farmer, or location"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+              value={searchQuery}
+              onChange={handleSearch}
+            />
           </div>
           <button onClick={toggleFilters} className="bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 px-4 py-2 rounded-md flex items-center justify-center transition-all duration-300 hover:shadow-md">
             <Filter className="h-5 w-5 mr-2" /> Filters {showFilters ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
@@ -329,13 +363,22 @@ const Marketplace = ({ walletInfo }) => {
             <p className="text-sm mt-2">Investors need NERO tokens to purchase. Producers can use NERO AA for gasless transactions.</p>
           )}
         </div>
-      </div>
-
-      {/* Error Loading Message */}
-      {error && (
-         <div className="text-center p-6 bg-red-50 border border-red-200 rounded-lg shadow mt-6">
-            <p className="text-red-700 font-medium">Error loading NERO Chain marketplace:</p>
-            <p className="text-red-600 text-sm">{error}</p>
+      ) : (
+        <>
+          {/* Listings Grid - Using the grid-cards class from your CSS */}
+          <div className="grid md:grid-cols-3 sm:grid-cols-1 gap-6">
+            {filteredListings.map((listing, index) => (
+              <div
+                key={listing.id}
+                className="opacity-0 animate-fadeIn"
+                style={{
+                  animationDelay: getAnimationDelay(index),
+                  animationFillMode: "forwards",
+                }}
+              >
+                <CropCard listing={listing} onInvestClick={handleInvestClick} />
+              </div>
+            ))}
           </div>
       )}
 
@@ -370,8 +413,17 @@ const Marketplace = ({ walletInfo }) => {
           chainName="NERO Chain"
         />
       )}
+      
+      {/* Onboarding Component */}
+      <MarketplaceOnboarding 
+        isOpen={showOnboarding} 
+        onComplete={handleOnboardingComplete} 
+      />
+      
+      {/* Marketplace How It Works Button - positioned above the general onboarding button */}
+      <MarketplaceHowItWorksButton onClick={handleHowItWorksClick} />
 
-      {/* Styles */}
+      {/* CSS Styles */}
       <style jsx global>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.4s ease-out; }

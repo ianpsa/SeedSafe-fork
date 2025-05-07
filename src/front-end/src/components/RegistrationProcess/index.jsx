@@ -13,17 +13,24 @@ const RegistrationProcess = ({ setCurrentPage }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showLogin, setShowLogin] = useState(false);
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [formData, setFormData] = useState({
-    cropType: '',
-    quantity: '',
-    harvestDate: '',
-    location: '',
-    area: '',
-    sustainablePractices: []
+    cropType: "",
+    quantity: "",
+    harvestDate: "",
+    location: "",
+    area: "", // Campo adicional para área da fazenda
+    sustainablePractices: [],
   });
+  const [registrationStatus, setRegistrationStatus] = useState(null); // 'pending', 'approved', 'rejected'
+  const [salesProgress, setSalesProgress] = useState(0); // Percentage of crop sold
+  
+  // New states for handling transaction processing
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [transactionHash, setTransactionHash] = useState(null);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState(null); // 'pending', 'approved', 'rejected'
   const [salesProgress, setSalesProgress] = useState(0); // Percentage of crop sold
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +40,7 @@ const RegistrationProcess = ({ setCurrentPage }) => {
     const { name, value } = e.target;
     setLoginData({
       ...loginData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -52,6 +59,7 @@ const RegistrationProcess = ({ setCurrentPage }) => {
       return;
     }
     setIsSubmitting(true);
+
     try {
       // Monta os dados para o UserOp
       const crop = formData.cropType;
@@ -68,7 +76,11 @@ const RegistrationProcess = ({ setCurrentPage }) => {
         doc,
       });
       console.log("✅ Safra registrada com UserOperation:", userOpHash);
+      setTransactionHash(userOpHash);
+      setRegistrationComplete(true);
+      setIsProcessing(false);
       setShowLogin(true);
+
     } catch (err) {
       console.error("Erro ao registrar safra:", err);
       alert("Erro ao registrar safra:\n" + (err?.message || "sem mensagem"));
@@ -76,19 +88,24 @@ const RegistrationProcess = ({ setCurrentPage }) => {
       setIsSubmitting(false);
     }
   };
+  
+  // Function to proceed to next step after registration is complete
+  const handleNextStep = () => {
+    setShowLogin(true);
+  };
 
   // Continue to verification after login
   useEffect(() => {
     if (isLoggedIn && showLogin === false && currentStep === 1) {
       setCurrentStep(2);
-      setRegistrationStatus('pending');
+      setRegistrationStatus("pending");
     }
   }, [isLoggedIn, showLogin, currentStep]);
 
   // Simulate auditor decision (approve/reject)
   const simulateAuditorDecision = (decision) => {
     setRegistrationStatus(decision);
-    if (decision === 'approved') {
+    if (decision === "approved") {
       setCurrentStep(3);
       // Simulate sales progress over time
       let progress = 0;
@@ -101,12 +118,29 @@ const RegistrationProcess = ({ setCurrentPage }) => {
     }
   };
 
+  useEffect(() => {
+    const testProvider = async () => {
+      try {
+        const { JsonRpcProvider } = await import("ethers");
+
+        const provider = new ethers.providers.JsonRpcProvider("https://rpc-testnet.nerochain.io");
+
+        const network = await provider.getNetwork();
+        console.log("🔍 Resultado do getNetwork():", network);
+      } catch (err) {
+        console.error("❌ Erro ao testar a RPC da NERO:", err);
+      }
+    };
+  
+    testProvider();
+  }, []);
+  
   // This would be called by the form to handle changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -117,11 +151,13 @@ const RegistrationProcess = ({ setCurrentPage }) => {
     if (checked) {
       updatedPractices.push(value);
     } else {
-      updatedPractices = updatedPractices.filter(practice => practice !== value);
+      updatedPractices = updatedPractices.filter(
+        (practice) => practice !== value
+      );
     }
     setFormData({
       ...formData,
-      sustainablePractices: updatedPractices
+      sustainablePractices: updatedPractices,
     });
   };
 
@@ -132,15 +168,17 @@ const RegistrationProcess = ({ setCurrentPage }) => {
       organic: 1.2,
       conservation: 0.8,
       rotation: 0.6,
-      water: 0.4
+      water: 0.4,
     };
+
     // Calcular com base nas práticas e área da fazenda
     let totalCredits = 0;
-    formData.sustainablePractices.forEach(practice => {
+    formData.sustainablePractices.forEach((practice) => {
       if (practiceCredits[practice]) {
         totalCredits += practiceCredits[practice];
       }
     });
+
     // Multiplicar pela área total da fazenda
     const area = parseFloat(formData.area) || 1; // Fallback para 1 se não houver área
     return (totalCredits * area).toFixed(2);
@@ -148,42 +186,58 @@ const RegistrationProcess = ({ setCurrentPage }) => {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
-      <WalletConnect />
-      <h1 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center animate-fadeIn">
-        Register Your Crop
-      </h1>
+    <WalletConnect />
+
+
       {/* Step Progress Circles */}
-      <StepCircles currentStep={currentStep} registrationStatus={registrationStatus} />
+      <div className="bg-white rounded-lg shadow-lg mb-5 pt-4 border border-gray-100 animate-fadeIn">
+        <h1 className="text-2xl md:text-3xl font-bold text-black text-center animate-fadeIn">
+          Register Your Crop
+        </h1>
+        <StepCircles
+          currentStep={currentStep}
+          registrationStatus={registrationStatus}
+        />
+      </div>
+
       {/* Step content based on current step */}
-      <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 border border-gray-100 animate-fadeIn">
+      <div className="bg-white rounded-lg shadow-lg md:p-6 border border-gray-100 animate-fadeIn">
         {showLogin && (
-          <LoginForm 
-            loginData={loginData} 
-            handleLoginChange={handleLoginChange} 
-            handleLoginSubmit={handleLoginSubmit} 
+          <LoginForm
+            loginData={loginData}
+            handleLoginChange={handleLoginChange}
+            handleLoginSubmit={handleLoginSubmit}
           />
         )}
+
         {currentStep === 1 && !showLogin && (
-          <CropForm 
-            formData={formData} 
-            handleInputChange={handleInputChange} 
-            handleCheckboxChange={handleCheckboxChange} 
-            handleStepOneSubmit={handleStepOneSubmit} 
+          <CropForm
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleCheckboxChange={handleCheckboxChange}
+            handleStepOneSubmit={handleStepOneSubmit}
+            isProcessing={isProcessing}
+            transactionHash={transactionHash}
+            registrationComplete={registrationComplete}
+            handleNextStep={handleNextStep}
             isSubmitting={isSubmitting}
+
           />
         )}
-        {currentStep === 2 && !showLogin && (
-          <VerificationStatus 
-            registrationStatus={registrationStatus} 
-            simulateAuditorDecision={simulateAuditorDecision} 
+
+        {currentStep === 2 && (
+          <VerificationStatus
+            registrationStatus={registrationStatus}
+            simulateAuditorDecision={simulateAuditorDecision}
           />
         )}
-        {currentStep === 3 && !showLogin && (
-          <MarketplaceStatus 
-            formData={formData} 
-            salesProgress={salesProgress} 
-            carbonCredits={calculateCarbonCredits()} 
-            setCurrentPage={setCurrentPage} 
+
+        {currentStep === 3 && (
+          <MarketplaceStatus
+            formData={formData}
+            salesProgress={salesProgress}
+            carbonCredits={calculateCarbonCredits()}
+            setCurrentPage={setCurrentPage}
           />
         )}
       </div>
