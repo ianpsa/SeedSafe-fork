@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import './index.css'; // Global styles aqui
 import {
   BrowserRouter as Router,
   Routes,
