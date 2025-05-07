@@ -86,6 +86,12 @@ function RemoveTrailingSlash() {
 }
 
 function App() {
+  // Onboarding state before any UI renders
+  const [pageLoaded, setPageLoaded] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const handleStartOnboarding = () => setShowOnboarding(true);
+  const handleOnboardingComplete = () => { setShowOnboarding(false); localStorage.setItem("seedsafe_onboarding_completed", "true"); };
+  
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   // Replace simple boolean with wallet details
@@ -303,28 +309,22 @@ function App() {
               onLogin={handleLogin}
             />
           )}
-
-    </Web3AuthProvider>
+        </div>
         {/* Only render these components after page has loaded */}
         {pageLoaded && (
           <>
-            {/* Onboarding Components - only keep the main one */}
             <Onboarding 
               isOpen={showOnboarding}
               onComplete={handleOnboardingComplete} 
             />
-            
-            {/* Onboarding Button - persistent and always visible */}
             <OnboardingButton onClick={handleStartOnboarding} />
-
-            {/* Chatbot Widget */}
             <div className="agrobot-button">
               <ChatbotWidget />
             </div>
           </>
         )}
-      </div>
-    </Router>
+      </Router>
+    </Web3AuthProvider>
   );
 }
 

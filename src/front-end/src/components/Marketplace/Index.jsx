@@ -9,7 +9,8 @@ import {
   ChevronDown,
   ChevronUp,
   Leaf,
-  Info
+  Info,
+  RefreshCw as RefreshIcon
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import FiltersPanel from "./FiltersPanel";
@@ -43,10 +44,17 @@ const formatDate = (timestamp) => {
 };
 
 const parseDocumentation = (docString) => {
+  if (!docString || typeof docString !== 'string') {
+    return {
+      location: 'Unknown Location',
+      area: 0,
+      practicesString: '',
+      sustainablePractices: []
+    };
+  }
   const locationMatch = docString.match(/Location: ([^,]+, [^,]+)/);
   const areaMatch = docString.match(/Area: (\d+(\.\d+)?)ha/);
   const practicesMatch = docString.match(/Practices: (.*)/);
-  
   return {
     location: locationMatch ? locationMatch[1].trim() : 'Unknown Location',
     area: areaMatch ? parseFloat(areaMatch[1]) : 0,
@@ -143,8 +151,13 @@ const Marketplace = ({ walletInfo }) => {
     fetchHarvests();
   }, [provider]);
 
+  useEffect(() => {
+    // Fallback to mock data: clear any previous error and show loading
     setIsLoading(true);
+    setError(null);
     setTimeout(() => {
+      // Populate mock listings and clear error
+      setError(null);
       setListings(mockListings);
       setFilteredListings(mockListings);
       setIsLoading(false);
@@ -166,6 +179,8 @@ const Marketplace = ({ walletInfo }) => {
   useEffect(() => {
     const formatted = listings.map(harvest => {
       const docInfo = parseDocumentation(harvest.documentation);
+      // Support both contract harvests (harvest.crop) and mock listings (harvest.cropType)
+      const cropName = harvest.crop || harvest.cropType || '';
       const carbonCredits = calculateCarbonCredits(docInfo.sustainablePractices, docInfo.area);
       // Price is already in Wei from the contract
       const priceInWei = harvest.pricePerUnit;
@@ -175,20 +190,24 @@ const Marketplace = ({ walletInfo }) => {
 
       return {
         id: harvest.id,
-        cropType: harvest.crop, 
-        quantity: harvest.quantity.toNumber(),
+        cropType: cropName,
+        quantity: typeof harvest.quantity === 'object' && typeof harvest.quantity.toNumber === 'function'
+          ? harvest.quantity.toNumber()
+          : Number(harvest.quantity),
         pricePerUnit: priceInWei, // Keep Wei price for calculations
         displayPriceNERO: displayPriceNERO, // NERO price for display
         displayPriceUSD: displayPriceUSD, // USD price for display
         harvestDate: formatDate(harvest.deliveryDate),
         producerAddress: harvest.producer,
-        farmerName: `Producer ${harvest.producer.substring(0, 6)}...`,
+        farmerName: harvest.producer
+          ? `Producer ${harvest.producer.substring(0, 6)}...`
+          : 'Unknown Producer',
         location: docInfo.location,
         area: docInfo.area,
         sustainablePractices: docInfo.sustainablePractices,
         carbonCredits: parseFloat(carbonCredits),
         farmerRating: 4.5, // Placeholder
-        imageUrl: `/placeholder-images/${harvest.crop.toLowerCase()}.jpg`,
+        imageUrl: `/placeholder-images/${cropName.toLowerCase()}.jpg`,
       };
     });
     setFormattedListings(formatted);
@@ -363,24 +382,7 @@ const Marketplace = ({ walletInfo }) => {
             <p className="text-sm mt-2">Investors need NERO tokens to purchase. Producers can use NERO AA for gasless transactions.</p>
           )}
         </div>
-      ) : (
-        <>
-          {/* Listings Grid - Using the grid-cards class from your CSS */}
-          <div className="grid md:grid-cols-3 sm:grid-cols-1 gap-6">
-            {filteredListings.map((listing, index) => (
-              <div
-                key={listing.id}
-                className="opacity-0 animate-fadeIn"
-                style={{
-                  animationDelay: getAnimationDelay(index),
-                  animationFillMode: "forwards",
-                }}
-              >
-                <CropCard listing={listing} onInvestClick={handleInvestClick} />
-              </div>
-            ))}
-          </div>
-      )}
+      </div>
 
       {/* Listings Grid or No Results Message */}
       {!isLoading && !error && (
@@ -424,7 +426,7 @@ const Marketplace = ({ walletInfo }) => {
       <MarketplaceHowItWorksButton onClick={handleHowItWorksClick} />
 
       {/* CSS Styles */}
-      <style jsx global>{`
+      <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.4s ease-out; }
         .animate-spin { animation: spin 1s linear infinite; }
