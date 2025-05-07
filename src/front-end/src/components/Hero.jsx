@@ -4,11 +4,10 @@ import heroImage from "../assets/DesignToken.png"; // Ajuste o caminho conforme 
 import { ButtonTooltip } from "./ButtonToolTips"; // Import the ButtonTooltip component
 import bgPattern from "../assets/bg-pattern.svg";
 
-
 const Hero = ({ openWalletModal, backgroundStyle }) => {
   return (
     <div
-      className="sm:flex-col lg:flex flex-row justify-center items-center gap-12 px-8 py-12"
+      className="flex flex-row sm:flex-col justify-center items-center gap-12 px-8 py-12"
       style={backgroundStyle}
     >
       <div className="flex-1 md:max-w-[600px]">
@@ -30,7 +29,7 @@ const Hero = ({ openWalletModal, backgroundStyle }) => {
               <i className="fas fa-seedling"></i> I'm a Producer
             </Link>
           </ButtonTooltip>
-          
+
           {/* Enhanced with tooltip */}
           <ButtonTooltip text="Browse available harvest tokens and carbon credits to support sustainable agriculture">
             <Link
