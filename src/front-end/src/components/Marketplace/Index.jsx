@@ -151,18 +151,18 @@ const Marketplace = ({ walletInfo }) => {
     fetchHarvests();
   }, [provider]);
 
+  // Fallback to mock data when fetch fails
   useEffect(() => {
-    // Fallback to mock data: clear any previous error and show loading
+    if (!error) return;
+    // Show loading while populating mock data
     setIsLoading(true);
-    setError(null);
     setTimeout(() => {
-      // Populate mock listings and clear error
-      setError(null);
       setListings(mockListings);
       setFilteredListings(mockListings);
       setIsLoading(false);
+      setError(null);
     }, 800);
-  }, []);
+  }, [error]);
   
   // Handler for the "How It Works" button
   const handleHowItWorksClick = () => {
